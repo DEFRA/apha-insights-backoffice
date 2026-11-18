@@ -20,7 +20,7 @@
 
       <p class="govuk-body">{{ intro }}</p>
 
-      <form action="/add-data" method="post" novalidate>
+      <form action="/update-risk-level" method="post" novalidate>
         <input type="hidden" name="crumb" value="{{ crumb }}">
 
         {% for disease in diseases %}

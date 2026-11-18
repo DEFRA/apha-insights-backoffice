@@ -69,7 +69,7 @@ describe('context and cache', () => {
             {
               current: false,
               text: 'Update risk level',
-              href: '/add-data'
+              href: '/update-risk-level'
             }
           ],
           serviceName: 'IDM Insights',
@@ -158,7 +158,7 @@ describe('context and cache', () => {
             {
               current: false,
               text: 'Update risk level',
-              href: '/add-data'
+              href: '/update-risk-level'
             }
           ],
           serviceName: 'IDM Insights',

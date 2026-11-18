@@ -1,12 +1,12 @@
-import { addDataPresenter } from '#/presenters/add-data/add-data-presenter.js'
+import { updateRiskLevelPresenter } from '#/presenters/update-risk-level/update-risk-level-presenter.js'
 import { currentRiskLevels } from '#test/helpers/risk-level-fixtures.js'
 
 const checkedValue = (radios) =>
   radios.items.find((item) => item.checked)?.value
 
-describe('#addDataPresenter', () => {
+describe('#updateRiskLevelPresenter', () => {
   test('Should provide an empty form with a radio group for each disease', () => {
-    const result = addDataPresenter({ diseases: currentRiskLevels() })
+    const result = updateRiskLevelPresenter({ diseases: currentRiskLevels() })
 
     expect(result).toMatchObject({
       pageTitle: 'Update risk level',
@@ -18,7 +18,9 @@ describe('#addDataPresenter', () => {
   })
 
   test('Should show the disease and its current risk level in each radio group', () => {
-    const [asf] = addDataPresenter({ diseases: currentRiskLevels() }).diseases
+    const [asf] = updateRiskLevelPresenter({
+      diseases: currentRiskLevels()
+    }).diseases
 
     expect(asf.name).toBe('African swine fever')
     expect(asf.radios.idPrefix).toBe('direction-asf')
@@ -27,7 +29,9 @@ describe('#addDataPresenter', () => {
   })
 
   test('Should offer increase, decrease and stay the same for each disease', () => {
-    const [asf] = addDataPresenter({ diseases: currentRiskLevels() }).diseases
+    const [asf] = updateRiskLevelPresenter({
+      diseases: currentRiskLevels()
+    }).diseases
 
     expect(asf.radios.items).toEqual([
       { value: 'increase', text: 'Increase', checked: false },
@@ -37,7 +41,7 @@ describe('#addDataPresenter', () => {
   })
 
   test('Should keep the submitted directions and comment', () => {
-    const result = addDataPresenter({
+    const result = updateRiskLevelPresenter({
       diseases: currentRiskLevels(),
       values: {
         directions: { asf: 'increase', hpai: 'same', bluetongue: 'decrease' },
@@ -54,7 +58,7 @@ describe('#addDataPresenter', () => {
   })
 
   test('Should present errors inline and in form order for the error summary', () => {
-    const result = addDataPresenter({
+    const result = updateRiskLevelPresenter({
       diseases: currentRiskLevels(),
       errors: {
         expertComment: 'Enter your expert comment',

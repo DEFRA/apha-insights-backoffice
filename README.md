@@ -12,13 +12,13 @@ until the backend API exists.
 It is built on the Core Delivery Platform (CDP) Node.js frontend template and follows the structure of
 [apha-risk-insights-frontend](https://github.com/DEFRA/apha-risk-insights-frontend).
 
-| Route                                 | Page                                                                                       |
-| ------------------------------------- | ------------------------------------------------------------------------------------------ |
-| `GET /`                               | Home, with a link to the add data page                                                     |
-| `GET`, `POST /add-data`               | Choose whether each disease's risk level goes up, down or stays, and add an expert comment |
-| `GET`, `POST /add-data/check-answers` | Check the answers, then submit                                                             |
-| `GET /add-data/confirmation`          | Submission received                                                                        |
-| `GET /health`                         | Health check used by the platform                                                          |
+| Route                                          | Page                                                                                       |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `GET /`                                        | Home, with a link to the update risk level page                                            |
+| `GET`, `POST /update-risk-level`               | Choose whether each disease's risk level goes up, down or stays, and add an expert comment |
+| `GET`, `POST /update-risk-level/check-answers` | Check the answers, then submit                                                             |
+| `GET /update-risk-level/confirmation`          | Submission received                                                                        |
+| `GET /health`                                  | Health check used by the platform                                                          |
 
 The service name shown in the header and page titles is the `serviceDisplayName` default in
 [src/config/config.js](./src/config/config.js). The risk level scale is in

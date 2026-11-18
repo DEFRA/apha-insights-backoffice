@@ -1,5 +1,5 @@
 /**
- * Gets the current risk level for each disease on the add data form.
+ * Gets the current risk level for each disease on the update risk level form.
  * @returns {Promise<{id: string, name: string, currentRiskLevel: string}[]>}
  */
 export async function getCurrentRiskLevels() {
@@ -17,7 +17,7 @@ export async function getCurrentRiskLevels() {
 
 /**
  * Submits a risk level change.
- * @param {object} _riskLevelChange - the validated, checked answers from the add data form
+ * @param {object} _riskLevelChange - the validated, checked answers from the update risk level form
  * @returns {Promise<void>}
  */
 export async function submitRiskLevelChange(_riskLevelChange) {

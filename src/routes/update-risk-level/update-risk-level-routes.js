@@ -1,7 +1,7 @@
 import { statusCodes } from '#/constants/status-codes.js'
-import { addDataPresenter } from '#/presenters/add-data/add-data-presenter.js'
-import { checkAnswersPresenter } from '#/presenters/add-data/check-answers-presenter.js'
-import { addDataConfirmationPresenter } from '#/presenters/add-data/add-data-confirmation-presenter.js'
+import { updateRiskLevelPresenter } from '#/presenters/update-risk-level/update-risk-level-presenter.js'
+import { checkAnswersPresenter } from '#/presenters/update-risk-level/check-answers-presenter.js'
+import { updateRiskLevelConfirmationPresenter } from '#/presenters/update-risk-level/update-risk-level-confirmation-presenter.js'
 import {
   toFormValues,
   validateRiskLevelChange
@@ -11,22 +11,22 @@ import {
   submitRiskLevelChange
 } from '#/services/risk-level-service.js'
 
-const ADD_DATA_PATH = '/add-data'
-const CHECK_ANSWERS_PATH = `${ADD_DATA_PATH}/check-answers`
-const CONFIRMATION_PATH = `${ADD_DATA_PATH}/confirmation`
+const UPDATE_RISK_LEVEL_PATH = '/update-risk-level'
+const CHECK_ANSWERS_PATH = `${UPDATE_RISK_LEVEL_PATH}/check-answers`
+const CONFIRMATION_PATH = `${UPDATE_RISK_LEVEL_PATH}/confirmation`
 
 // Session key for the validated answers between the form and check your answers
 const SESSION_KEY = 'riskLevelChange'
 
-const getAddData = {
+const getUpdateRiskLevel = {
   method: 'GET',
-  path: ADD_DATA_PATH,
+  path: UPDATE_RISK_LEVEL_PATH,
   handler: async (request, h) => {
     const saved = request.yar.get(SESSION_KEY)
 
     return h.view(
-      'add-data/index',
-      addDataPresenter({
+      'update-risk-level/index',
+      updateRiskLevelPresenter({
         diseases: await getCurrentRiskLevels(),
         values: saved ? toFormValues(saved) : {}
       })
@@ -34,9 +34,9 @@ const getAddData = {
   }
 }
 
-const postAddData = {
+const postUpdateRiskLevel = {
   method: 'POST',
-  path: ADD_DATA_PATH,
+  path: UPDATE_RISK_LEVEL_PATH,
   handler: async (request, h) => {
     const diseases = await getCurrentRiskLevels()
     const { value, errors, values } = validateRiskLevelChange(
@@ -46,7 +46,10 @@ const postAddData = {
 
     if (errors) {
       return h
-        .view('add-data/index', addDataPresenter({ diseases, values, errors }))
+        .view(
+          'update-risk-level/index',
+          updateRiskLevelPresenter({ diseases, values, errors })
+        )
         .code(statusCodes.badRequest)
     }
 
@@ -63,11 +66,11 @@ const getCheckAnswers = {
     const riskLevelChange = request.yar.get(SESSION_KEY)
 
     if (!riskLevelChange) {
-      return h.redirect(ADD_DATA_PATH)
+      return h.redirect(UPDATE_RISK_LEVEL_PATH)
     }
 
     return h.view(
-      'add-data/check-answers',
+      'update-risk-level/check-answers',
       checkAnswersPresenter(riskLevelChange)
     )
   }
@@ -80,7 +83,7 @@ const postCheckAnswers = {
     const riskLevelChange = request.yar.get(SESSION_KEY)
 
     if (!riskLevelChange) {
-      return h.redirect(ADD_DATA_PATH)
+      return h.redirect(UPDATE_RISK_LEVEL_PATH)
     }
 
     // The expert comment is free text that may name people or premises, so it is never logged
@@ -95,17 +98,20 @@ const postCheckAnswers = {
   }
 }
 
-const getAddDataConfirmation = {
+const getUpdateRiskLevelConfirmation = {
   method: 'GET',
   path: CONFIRMATION_PATH,
   handler: (_request, h) =>
-    h.view('add-data/confirmation', addDataConfirmationPresenter())
+    h.view(
+      'update-risk-level/confirmation',
+      updateRiskLevelConfirmationPresenter()
+    )
 }
 
-export const addDataRoutes = [
-  getAddData,
-  postAddData,
+export const updateRiskLevelRoutes = [
+  getUpdateRiskLevel,
+  postUpdateRiskLevel,
   getCheckAnswers,
   postCheckAnswers,
-  getAddDataConfirmation
+  getUpdateRiskLevelConfirmation
 ]

@@ -68,7 +68,7 @@ export const toFormValues = ({ changes, expertComment }) => ({
 })
 
 /**
- * Validates an add data form payload and works out each disease's new risk level
+ * Validates an update risk level form payload and works out each disease's new risk level
  * @param {object} payload - the raw form payload
  * @param {{id: string, name: string, currentRiskLevel: string}[]} diseases - the diseases on the form
  * @returns {{ value?: object, errors?: Record<string, string>, values: object }} the risk level change,
