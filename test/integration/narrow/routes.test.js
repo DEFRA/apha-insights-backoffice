@@ -104,11 +104,11 @@ describe('#routes', () => {
       expect($('h1').text().trim()).toBe('IDM Insights')
     })
 
-    test('links to the add data page', async () => {
+    test('links to the update risk level page', async () => {
       const { $ } = await getPage('/')
 
       expect(linksIn($, 'main a.govuk-link')).toEqual([
-        { text: 'Add new data', href: '/add-data' }
+        { text: 'Update risk level', href: '/update-risk-level' }
       ])
     })
 
@@ -119,12 +119,12 @@ describe('#routes', () => {
     })
   })
 
-  describe('GET /add-data', () => {
+  describe('GET /update-risk-level', () => {
     test('renders the form with its heading and instructions', async () => {
-      const { $, statusCode } = await getPage('/add-data')
+      const { $, statusCode } = await getPage('/update-risk-level')
 
       expect(statusCode).toBe(statusCodes.ok)
-      expect($('h1').text().trim()).toBe('Add new data')
+      expect($('h1').text().trim()).toBe('Update risk level')
       expect($('main p.govuk-body').first().text().trim()).toContain(
         'increase, decrease or stay the same'
       )
@@ -132,7 +132,7 @@ describe('#routes', () => {
     })
 
     test('renders a radio group for each of the three diseases with its current risk level', async () => {
-      const { $ } = await getPage('/add-data')
+      const { $ } = await getPage('/update-risk-level')
       const legends = $('fieldset legend')
         .map((_, legend) => $(legend).text().trim())
         .get()
@@ -158,7 +158,7 @@ describe('#routes', () => {
       ['direction-hpai'],
       ['direction-bluetongue']
     ])('offers increase, decrease and stay the same for %s', async (name) => {
-      const { $ } = await getPage('/add-data')
+      const { $ } = await getPage('/update-risk-level')
       const options = $(`input[name="${name}"]`)
         .map((_, input) => ({
           value: $(input).val(),
@@ -174,7 +174,7 @@ describe('#routes', () => {
     })
 
     test('renders the expert comment text box with a character count', async () => {
-      const { $ } = await getPage('/add-data')
+      const { $ } = await getPage('/update-risk-level')
 
       expect($('label[for="expertComment"]').text().trim()).toBe(
         'Expert comment'
@@ -186,23 +186,23 @@ describe('#routes', () => {
     })
 
     test('renders a Continue button and a CSRF token', async () => {
-      const { $ } = await getPage('/add-data')
+      const { $ } = await getPage('/update-risk-level')
 
       expect($('main form button').text().trim()).toBe('Continue')
       expect($('main form input[name="crumb"]').val()).toBeTruthy()
     })
   })
 
-  describe('POST /add-data', () => {
+  describe('POST /update-risk-level', () => {
     test('rejects an empty submission with one error per disease and one for the comment', async () => {
       const { $, statusCode } = await createSession(server).submitForm(
-        '/add-data',
+        '/update-risk-level',
         {}
       )
 
       expect(statusCode).toBe(statusCodes.badRequest)
       expect($('head > title').text().trim()).toBe(
-        'Error: Add new data | IDM Insights'
+        'Error: Update risk level | IDM Insights'
       )
       expect(summaryErrors($).map(({ href }) => href)).toEqual([
         '#direction-asf',
@@ -215,7 +215,10 @@ describe('#routes', () => {
     })
 
     test('links every error in the summary to a field on the page', async () => {
-      const { $ } = await createSession(server).submitForm('/add-data', {})
+      const { $ } = await createSession(server).submitForm(
+        '/update-risk-level',
+        {}
+      )
 
       for (const { href } of summaryErrors($)) {
         expect($(href)).toHaveLength(1)
@@ -223,11 +226,14 @@ describe('#routes', () => {
     })
 
     test('keeps the chosen directions and the comment when re-rendering with an error', async () => {
-      const { $ } = await createSession(server).submitForm('/add-data', {
-        'direction-asf': 'increase',
-        'direction-hpai': 'same',
-        expertComment: 'Kept comment'
-      })
+      const { $ } = await createSession(server).submitForm(
+        '/update-risk-level',
+        {
+          'direction-asf': 'increase',
+          'direction-hpai': 'same',
+          expertComment: 'Kept comment'
+        }
+      )
 
       expect(
         $('input[name="direction-asf"][value="increase"]').attr('checked')
@@ -254,7 +260,7 @@ describe('#routes', () => {
       ])
 
       const { $, statusCode } = await createSession(server).submitForm(
-        '/add-data',
+        '/update-risk-level',
         { 'direction-asf': 'increase', expertComment: 'Comment' }
       )
 
@@ -269,8 +275,11 @@ describe('#routes', () => {
 
     test('rejects a submission without a CSRF token', async () => {
       const session = createSession(server)
-      await session.get('/add-data')
-      const { statusCode } = await session.post('/add-data', validFormPayload())
+      await session.get('/update-risk-level')
+      const { statusCode } = await session.post(
+        '/update-risk-level',
+        validFormPayload()
+      )
 
       expect(statusCode).toBe(statusCodes.forbidden)
     })
@@ -278,31 +287,33 @@ describe('#routes', () => {
     test('redirects a valid submission to check your answers without submitting it', async () => {
       const session = createSession(server)
       const { statusCode, headers } = await session.submitForm(
-        '/add-data',
+        '/update-risk-level',
         validFormPayload()
       )
 
       expect(statusCode).toBe(statusCodes.found)
-      expect(headers.location).toBe('/add-data/check-answers')
+      expect(headers.location).toBe('/update-risk-level/check-answers')
       expect(submitRiskLevelChange).not.toHaveBeenCalled()
     })
   })
 
-  describe('GET /add-data/check-answers', () => {
+  describe('GET /update-risk-level/check-answers', () => {
     test('redirects to the form when there are no answers to check', async () => {
       const { statusCode, headers } = await createSession(server).get(
-        '/add-data/check-answers'
+        '/update-risk-level/check-answers'
       )
 
       expect(statusCode).toBe(statusCodes.found)
-      expect(headers.location).toBe('/add-data')
+      expect(headers.location).toBe('/update-risk-level')
     })
 
     test('shows a card for each disease with its current level, direction and new level', async () => {
       const session = createSession(server)
-      await session.submitForm('/add-data', validFormPayload())
+      await session.submitForm('/update-risk-level', validFormPayload())
 
-      const { $, statusCode } = await session.get('/add-data/check-answers')
+      const { $, statusCode } = await session.get(
+        '/update-risk-level/check-answers'
+      )
       const titles = $('.govuk-summary-card__title')
         .map((_, title) => $(title).text().trim())
         .get()
@@ -324,9 +335,9 @@ describe('#routes', () => {
 
     test('shows the expert comment with a link back to the form', async () => {
       const session = createSession(server)
-      await session.submitForm('/add-data', validFormPayload())
+      await session.submitForm('/update-risk-level', validFormPayload())
 
-      const { $ } = await session.get('/add-data/check-answers')
+      const { $ } = await session.get('/update-risk-level/check-answers')
       const comment = $('.govuk-summary-list__row').filter(
         (_, row) => $(row).find('dt').text().trim() === 'Expert comment'
       )
@@ -334,14 +345,14 @@ describe('#routes', () => {
       expect(comment.find('dd').first().text().trim()).toBe(
         'New outbreaks reported in domestic pigs.'
       )
-      expect(comment.find('a').attr('href')).toBe('/add-data')
+      expect(comment.find('a').attr('href')).toBe('/update-risk-level')
     })
 
     test('pre-fills the form with the answers when Change is used', async () => {
       const session = createSession(server)
-      await session.submitForm('/add-data', validFormPayload())
+      await session.submitForm('/update-risk-level', validFormPayload())
 
-      const { $ } = await session.get('/add-data')
+      const { $ } = await session.get('/update-risk-level')
 
       expect(
         $('input[name="direction-asf"][value="increase"]').attr('checked')
@@ -357,12 +368,12 @@ describe('#routes', () => {
     })
   })
 
-  describe('POST /add-data/check-answers', () => {
+  describe('POST /update-risk-level/check-answers', () => {
     test('logs and submits the checked answers once', async () => {
       logInfo.mockClear()
       const session = createSession(server)
-      await session.submitForm('/add-data', validFormPayload())
-      await session.submitForm('/add-data/check-answers', {})
+      await session.submitForm('/update-risk-level', validFormPayload())
+      await session.submitForm('/update-risk-level/check-answers', {})
 
       expect(submitRiskLevelChange).toHaveBeenCalledTimes(1)
       expect(submitRiskLevelChange).toHaveBeenCalledWith(validRiskLevelChange())
@@ -374,8 +385,8 @@ describe('#routes', () => {
     test('never logs the expert comment', async () => {
       logInfo.mockClear()
       const session = createSession(server)
-      await session.submitForm('/add-data', validFormPayload())
-      await session.submitForm('/add-data/check-answers', {})
+      await session.submitForm('/update-risk-level', validFormPayload())
+      await session.submitForm('/update-risk-level/check-answers', {})
 
       expect(JSON.stringify(logInfo.mock.calls)).not.toContain(
         validRiskLevelChange().expertComment
@@ -384,8 +395,11 @@ describe('#routes', () => {
 
     test('rejects a submission without a CSRF token', async () => {
       const session = createSession(server)
-      await session.submitForm('/add-data', validFormPayload())
-      const { statusCode } = await session.post('/add-data/check-answers', {})
+      await session.submitForm('/update-risk-level', validFormPayload())
+      const { statusCode } = await session.post(
+        '/update-risk-level/check-answers',
+        {}
+      )
 
       expect(statusCode).toBe(statusCodes.forbidden)
       expect(submitRiskLevelChange).not.toHaveBeenCalled()
@@ -393,50 +407,50 @@ describe('#routes', () => {
 
     test('redirects to the confirmation page after submitting', async () => {
       const session = createSession(server)
-      await session.submitForm('/add-data', validFormPayload())
+      await session.submitForm('/update-risk-level', validFormPayload())
       const { statusCode, headers } = await session.submitForm(
-        '/add-data/check-answers',
+        '/update-risk-level/check-answers',
         {}
       )
 
       expect(statusCode).toBe(statusCodes.found)
-      expect(headers.location).toBe('/add-data/confirmation')
+      expect(headers.location).toBe('/update-risk-level/confirmation')
     })
 
     test('clears the answers after submitting, so they cannot be sent twice', async () => {
       const session = createSession(server)
-      await session.submitForm('/add-data', validFormPayload())
-      await session.submitForm('/add-data/check-answers', {})
+      await session.submitForm('/update-risk-level', validFormPayload())
+      await session.submitForm('/update-risk-level/check-answers', {})
 
       const { statusCode, headers } = await session.get(
-        '/add-data/check-answers'
+        '/update-risk-level/check-answers'
       )
 
       expect(statusCode).toBe(statusCodes.found)
-      expect(headers.location).toBe('/add-data')
+      expect(headers.location).toBe('/update-risk-level')
     })
 
     test('does not submit when there are no answers to check', async () => {
       const session = createSession(server)
       const { crumb } = {
-        crumb: (await session.get('/add-data'))
+        crumb: (await session.get('/update-risk-level'))
           .$('main input[name="crumb"]')
           .val()
       }
       const { statusCode, headers } = await session.post(
-        '/add-data/check-answers',
+        '/update-risk-level/check-answers',
         { crumb }
       )
 
       expect(statusCode).toBe(statusCodes.found)
-      expect(headers.location).toBe('/add-data')
+      expect(headers.location).toBe('/update-risk-level')
       expect(submitRiskLevelChange).not.toHaveBeenCalled()
     })
   })
 
-  describe('GET /add-data/confirmation', () => {
+  describe('GET /update-risk-level/confirmation', () => {
     test('renders the confirmation panel', async () => {
-      const { $, statusCode } = await getPage('/add-data/confirmation')
+      const { $, statusCode } = await getPage('/update-risk-level/confirmation')
 
       expect(statusCode).toBe(statusCodes.ok)
       expect($('h1.govuk-panel__title').text().trim()).toBe(
@@ -445,11 +459,11 @@ describe('#routes', () => {
     })
 
     test('links back to home and to add another', async () => {
-      const { $ } = await getPage('/add-data/confirmation')
+      const { $ } = await getPage('/update-risk-level/confirmation')
 
       expect(linksIn($, 'main a.govuk-link')).toEqual([
         { text: 'Home', href: '/' },
-        { text: 'Add another', href: '/add-data' }
+        { text: 'Add another', href: '/update-risk-level' }
       ])
     })
   })

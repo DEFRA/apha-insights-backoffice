@@ -1,6 +1,6 @@
 const NAVIGATION_ITEMS = [
   { text: 'Home', href: '/' },
-  { text: 'Add new data', href: '/add-data' }
+  { text: 'Update risk level', href: '/update-risk-level' }
 ]
 
 /**

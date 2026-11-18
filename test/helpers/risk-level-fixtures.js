@@ -1,7 +1,7 @@
 const NEW_OUTBREAKS = 'New outbreaks reported in domestic pigs.'
 
 /**
- * The diseases on the add data form, with their current risk levels
+ * The diseases on the update risk level form, with their current risk levels
  */
 export const currentRiskLevels = () => [
   { id: 'asf', name: 'African swine fever', currentRiskLevel: 'medium' },
@@ -14,7 +14,7 @@ export const currentRiskLevels = () => [
 ]
 
 /**
- * A valid add data form payload, as the browser submits it
+ * A valid update risk level form payload, as the browser submits it
  */
 export const validFormPayload = () => ({
   'direction-asf': 'increase',

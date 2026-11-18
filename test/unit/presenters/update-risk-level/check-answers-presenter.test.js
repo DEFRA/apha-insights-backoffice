@@ -1,4 +1,4 @@
-import { checkAnswersPresenter } from '#/presenters/add-data/check-answers-presenter.js'
+import { checkAnswersPresenter } from '#/presenters/update-risk-level/check-answers-presenter.js'
 import { validRiskLevelChange } from '#test/helpers/risk-level-fixtures.js'
 
 describe('#checkAnswersPresenter', () => {
@@ -26,7 +26,7 @@ describe('#checkAnswersPresenter', () => {
 
     expect(newLevel.actions.items).toEqual([
       {
-        href: '/add-data',
+        href: '/update-risk-level',
         text: 'Change',
         visuallyHiddenText: 'African swine fever'
       }
@@ -43,7 +43,7 @@ describe('#checkAnswersPresenter', () => {
         actions: {
           items: [
             {
-              href: '/add-data',
+              href: '/update-risk-level',
               text: 'Change',
               visuallyHiddenText: 'expert comment'
             }

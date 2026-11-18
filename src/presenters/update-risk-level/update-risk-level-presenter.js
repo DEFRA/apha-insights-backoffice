@@ -5,7 +5,7 @@ import {
   directionFieldName
 } from '#/schemas/risk-level-change-schema.js'
 
-const PAGE_TITLE = 'Add new data'
+const PAGE_TITLE = 'Update risk level'
 
 const directionItems = (selected) =>
   riskDirections.map(({ value, text }) => ({
@@ -36,14 +36,18 @@ const diseaseRadios = ({ id, name, currentRiskLevel }, values, errors) => {
 }
 
 /**
- * Formats data ready for presenting in the `/add-data` page
- * @module addDataPresenter
+ * Formats data ready for presenting in the `/update-risk-level` page
+ * @module updateRiskLevelPresenter
  * @param {object} form
  * @param {{id: string, name: string, currentRiskLevel: string}[]} form.diseases - the diseases to change
  * @param {object} [form.values] - the submitted values to keep when re-rendering the form
  * @param {Record<string, string>} [form.errors] - an error message per invalid field
  */
-export const addDataPresenter = ({ diseases, values = {}, errors = {} }) => {
+export const updateRiskLevelPresenter = ({
+  diseases,
+  values = {},
+  errors = {}
+}) => {
   const hasErrors = Object.keys(errors).length > 0
   const fields = [
     ...diseases.map(({ id }) => directionFieldName(id)),

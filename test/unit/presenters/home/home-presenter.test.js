@@ -6,7 +6,7 @@ describe('#homePresenter', () => {
       pageTitle: 'Home',
       heading: 'IDM Insights',
       intro: 'Record risk level changes and view the latest data.',
-      links: [{ text: 'Add new data', href: '/add-data' }]
+      links: [{ text: 'Update risk level', href: '/update-risk-level' }]
     })
   })
 })

@@ -1,7 +1,7 @@
 import { riskDirectionText, riskLevelText } from '#/constants/risk-levels.js'
 
 const PAGE_TITLE = 'Check your answers'
-const CHANGE_HREF = '/add-data'
+const CHANGE_HREF = '/update-risk-level'
 
 const changeAction = (visuallyHiddenText) => ({
   items: [{ href: CHANGE_HREF, text: 'Change', visuallyHiddenText }]
@@ -32,7 +32,7 @@ const diseaseCard = ({
 })
 
 /**
- * Formats data ready for presenting in the `/add-data/check-answers` page
+ * Formats data ready for presenting in the `/update-risk-level/check-answers` page
  * @module checkAnswersPresenter
  * @param {{changes: object[], expertComment: string}} riskLevelChange - the validated answers
  */
