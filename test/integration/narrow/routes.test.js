@@ -267,6 +267,14 @@ describe('#routes', () => {
       ])
     })
 
+    test('rejects a submission without a CSRF token', async () => {
+      const session = createSession(server)
+      await session.get('/add-data')
+      const { statusCode } = await session.post('/add-data', validFormPayload())
+
+      expect(statusCode).toBe(statusCodes.forbidden)
+    })
+
     test('redirects a valid submission to check your answers without submitting it', async () => {
       const session = createSession(server)
       const { statusCode, headers } = await session.submitForm(
@@ -372,6 +380,15 @@ describe('#routes', () => {
       expect(JSON.stringify(logInfo.mock.calls)).not.toContain(
         validRiskLevelChange().expertComment
       )
+    })
+
+    test('rejects a submission without a CSRF token', async () => {
+      const session = createSession(server)
+      await session.submitForm('/add-data', validFormPayload())
+      const { statusCode } = await session.post('/add-data/check-answers', {})
+
+      expect(statusCode).toBe(statusCodes.forbidden)
+      expect(submitRiskLevelChange).not.toHaveBeenCalled()
     })
 
     test('redirects to the confirmation page after submitting', async () => {
