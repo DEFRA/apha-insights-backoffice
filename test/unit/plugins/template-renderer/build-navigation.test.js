@@ -16,7 +16,7 @@ describe('#buildNavigation', () => {
       },
       {
         current: false,
-        text: 'Add new data',
+        text: 'Update risk level',
         href: '/add-data'
       }
     ])
@@ -31,7 +31,7 @@ describe('#buildNavigation', () => {
       },
       {
         current: false,
-        text: 'Add new data',
+        text: 'Update risk level',
         href: '/add-data'
       }
     ])

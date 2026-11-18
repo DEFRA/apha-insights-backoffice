@@ -9,8 +9,8 @@ describe('#addDataPresenter', () => {
     const result = addDataPresenter({ diseases: currentRiskLevels() })
 
     expect(result).toMatchObject({
-      pageTitle: 'Add new data',
-      heading: 'Add new data',
+      pageTitle: 'Update risk level',
+      heading: 'Update risk level',
       expertComment: { value: undefined, maxLength: 2000 },
       errorList: []
     })
@@ -65,7 +65,7 @@ describe('#addDataPresenter', () => {
       }
     })
 
-    expect(result.pageTitle).toBe('Error: Add new data')
+    expect(result.pageTitle).toBe('Error: Update risk level')
     expect(result.diseases[0].radios.errorMessage).toEqual({
       text: 'Select whether the risk level for African swine fever increases, decreases or stays the same'
     })

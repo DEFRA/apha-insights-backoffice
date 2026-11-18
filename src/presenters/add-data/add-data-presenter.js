@@ -5,7 +5,7 @@ import {
   directionFieldName
 } from '#/schemas/risk-level-change-schema.js'
 
-const PAGE_TITLE = 'Add new data'
+const PAGE_TITLE = 'Update risk level'
 
 const directionItems = (selected) =>
   riskDirections.map(({ value, text }) => ({

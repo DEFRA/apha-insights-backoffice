@@ -108,7 +108,7 @@ describe('#routes', () => {
       const { $ } = await getPage('/')
 
       expect(linksIn($, 'main a.govuk-link')).toEqual([
-        { text: 'Add new data', href: '/add-data' }
+        { text: 'Update risk level', href: '/add-data' }
       ])
     })
 
@@ -124,7 +124,7 @@ describe('#routes', () => {
       const { $, statusCode } = await getPage('/add-data')
 
       expect(statusCode).toBe(statusCodes.ok)
-      expect($('h1').text().trim()).toBe('Add new data')
+      expect($('h1').text().trim()).toBe('Update risk level')
       expect($('main p.govuk-body').first().text().trim()).toContain(
         'increase, decrease or stay the same'
       )
@@ -202,7 +202,7 @@ describe('#routes', () => {
 
       expect(statusCode).toBe(statusCodes.badRequest)
       expect($('head > title').text().trim()).toBe(
-        'Error: Add new data | IDM Insights'
+        'Error: Update risk level | IDM Insights'
       )
       expect(summaryErrors($).map(({ href }) => href)).toEqual([
         '#direction-asf',

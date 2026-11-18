@@ -68,7 +68,7 @@ describe('context and cache', () => {
             },
             {
               current: false,
-              text: 'Add new data',
+              text: 'Update risk level',
               href: '/add-data'
             }
           ],
@@ -157,7 +157,7 @@ describe('context and cache', () => {
             },
             {
               current: false,
-              text: 'Add new data',
+              text: 'Update risk level',
               href: '/add-data'
             }
           ],
