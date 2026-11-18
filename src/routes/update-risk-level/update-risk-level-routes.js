@@ -86,7 +86,7 @@ const postCheckAnswers = {
       return h.redirect(UPDATE_RISK_LEVEL_PATH)
     }
 
-    // The expert comment is free text that may name people or premises, so it is never logged
+    // The comment is free text that may name people or premises, so it is never logged
     const summary = riskLevelChange.changes
       .map(({ id, direction }) => `${id}:${direction}`)
       .join(', ')

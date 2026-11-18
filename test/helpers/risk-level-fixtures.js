@@ -1,4 +1,8 @@
-const NEW_OUTBREAKS = 'New outbreaks reported in domestic pigs.'
+const USER_COMMENTS = {
+  asf: 'New outbreaks reported in domestic pigs.',
+  hpai: 'No change in wild bird findings.',
+  bluetongue: 'Vector season has ended.'
+}
 
 /**
  * The diseases on the update risk level form, with their current risk levels
@@ -20,7 +24,9 @@ export const validFormPayload = () => ({
   'direction-asf': 'increase',
   'direction-hpai': 'same',
   'direction-bluetongue': 'decrease',
-  expertComment: NEW_OUTBREAKS
+  'userComment-asf': USER_COMMENTS.asf,
+  'userComment-hpai': USER_COMMENTS.hpai,
+  'userComment-bluetongue': USER_COMMENTS.bluetongue
 })
 
 /**
@@ -33,22 +39,24 @@ export const validRiskLevelChange = () => ({
       disease: 'African swine fever',
       currentRiskLevel: 'medium',
       direction: 'increase',
-      newRiskLevel: 'high'
+      newRiskLevel: 'high',
+      userComment: USER_COMMENTS.asf
     },
     {
       id: 'hpai',
       disease: 'Highly pathogenic avian influenza',
       currentRiskLevel: 'high',
       direction: 'same',
-      newRiskLevel: 'high'
+      newRiskLevel: 'high',
+      userComment: USER_COMMENTS.hpai
     },
     {
       id: 'bluetongue',
       disease: 'Bluetongue',
       currentRiskLevel: 'low',
       direction: 'decrease',
-      newRiskLevel: 'very-low'
+      newRiskLevel: 'very-low',
+      userComment: USER_COMMENTS.bluetongue
     }
-  ],
-  expertComment: NEW_OUTBREAKS
+  ]
 })

@@ -9,47 +9,47 @@ describe('#checkAnswersPresenter', () => {
     expect(result.heading).toBe('Check your answers')
   })
 
-  test('Should provide a card for each disease with its current level, direction and new level', () => {
+  test('Should provide a card for each disease with its current level, direction, new level and comment', () => {
     const [asf] = checkAnswersPresenter(validRiskLevelChange()).diseases
 
     expect(asf.title).toBe('African swine fever')
     expect(asf.rows.map(({ key, value }) => [key.text, value.text])).toEqual([
       ['Current risk level', 'Medium'],
       ['Direction of change', 'Increase'],
-      ['New risk level', 'High']
+      ['New risk level', 'High'],
+      ['Comment', 'New outbreaks reported in domestic pigs.']
     ])
   })
 
-  test("Should link each disease's new risk level to the form to change it", () => {
+  test("Should link each disease's new risk level to its direction field on the form", () => {
     const [asf] = checkAnswersPresenter(validRiskLevelChange()).diseases
     const [, , newLevel] = asf.rows
 
     expect(newLevel.actions.items).toEqual([
       {
-        href: '/update-risk-level',
+        href: '/update-risk-level#direction-asf',
         text: 'Change',
         visuallyHiddenText: 'African swine fever'
       }
     ])
   })
 
-  test('Should provide the expert comment with a link to change it', () => {
-    const { comment } = checkAnswersPresenter(validRiskLevelChange())
+  test("Should link each disease's comment to its comment field on the form", () => {
+    const [, hpai] = checkAnswersPresenter(validRiskLevelChange()).diseases
+    const [, , , comment] = hpai.rows
 
-    expect(comment.rows).toEqual([
+    expect(comment.actions.items).toEqual([
       {
-        key: { text: 'Expert comment' },
-        value: { text: 'New outbreaks reported in domestic pigs.' },
-        actions: {
-          items: [
-            {
-              href: '/update-risk-level',
-              text: 'Change',
-              visuallyHiddenText: 'expert comment'
-            }
-          ]
-        }
+        href: '/update-risk-level#userComment-hpai',
+        text: 'Change',
+        visuallyHiddenText: 'comment for Highly pathogenic avian influenza'
       }
     ])
+  })
+
+  test('Should not provide a separate comment list', () => {
+    expect(checkAnswersPresenter(validRiskLevelChange())).not.toHaveProperty(
+      'comment'
+    )
   })
 })

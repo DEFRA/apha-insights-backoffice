@@ -25,23 +25,8 @@
 
         {% for disease in diseases %}
           {{ govukRadios(disease.radios) }}
+          {{ govukCharacterCount(disease.userComment) }}
         {% endfor %}
-
-        {{ govukCharacterCount({
-          name: "expertComment",
-          id: "expertComment",
-          label: {
-            text: "Expert comment",
-            classes: "govuk-label--m"
-          },
-          hint: {
-            text: "Give the reasons for the changes."
-          },
-          maxlength: expertComment.maxLength,
-          rows: 8,
-          value: expertComment.value,
-          errorMessage: expertComment.errorMessage
-        }) }}
 
         {{ govukButton({
           text: "Continue",

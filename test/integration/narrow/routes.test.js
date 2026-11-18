@@ -173,16 +173,32 @@ describe('#routes', () => {
       ])
     })
 
-    test('renders the expert comment text box with a character count', async () => {
+    test.each([
+      ['asf', 'African swine fever'],
+      ['hpai', 'Highly pathogenic avian influenza'],
+      ['bluetongue', 'Bluetongue']
+    ])(
+      'renders a comment box with a character count for %s',
+      async (id, name) => {
+        const { $ } = await getPage('/update-risk-level')
+        const field = `userComment-${id}`
+
+        expect($(`label[for="${field}"]`).text().trim()).toBe(
+          `Comment for ${name}`
+        )
+        expect($(`textarea#${field}`).attr('name')).toBe(field)
+        expect(
+          $(`textarea#${field}`)
+            .closest('[data-module="govuk-character-count"]')
+            .attr('data-maxlength')
+        ).toBe('500')
+      }
+    )
+
+    test('does not render a shared comment box', async () => {
       const { $ } = await getPage('/update-risk-level')
 
-      expect($('label[for="expertComment"]').text().trim()).toBe(
-        'Expert comment'
-      )
-      expect($('textarea#expertComment').attr('name')).toBe('expertComment')
-      expect(
-        $('[data-module="govuk-character-count"]').attr('data-maxlength')
-      ).toBe('2000')
+      expect($('textarea')).toHaveLength(3)
     })
 
     test('renders a Continue button and a CSRF token', async () => {
@@ -194,7 +210,7 @@ describe('#routes', () => {
   })
 
   describe('POST /update-risk-level', () => {
-    test('rejects an empty submission with one error per disease and one for the comment', async () => {
+    test('rejects an empty submission with a direction and a comment error per disease', async () => {
       const { $, statusCode } = await createSession(server).submitForm(
         '/update-risk-level',
         {}
@@ -206,11 +222,13 @@ describe('#routes', () => {
       )
       expect(summaryErrors($).map(({ href }) => href)).toEqual([
         '#direction-asf',
+        '#userComment-asf',
         '#direction-hpai',
+        '#userComment-hpai',
         '#direction-bluetongue',
-        '#expertComment'
+        '#userComment-bluetongue'
       ])
-      expect($('.govuk-error-message')).toHaveLength(4)
+      expect($('.govuk-error-message')).toHaveLength(6)
       expect(submitRiskLevelChange).not.toHaveBeenCalled()
     })
 
@@ -225,13 +243,32 @@ describe('#routes', () => {
       }
     })
 
-    test('keeps the chosen directions and the comment when re-rendering with an error', async () => {
+    test('rejects a submission missing a comment and shows the error', async () => {
+      const { $, statusCode } = await createSession(server).submitForm(
+        '/update-risk-level',
+        { ...validFormPayload(), 'userComment-hpai': '' }
+      )
+
+      expect(statusCode).toBe(statusCodes.badRequest)
+      expect(summaryErrors($)).toEqual([
+        {
+          text: 'Enter a comment for Highly pathogenic avian influenza',
+          href: '#userComment-hpai'
+        }
+      ])
+      expect($('#userComment-hpai-error').text().trim()).toContain(
+        'Enter a comment for Highly pathogenic avian influenza'
+      )
+      expect(submitRiskLevelChange).not.toHaveBeenCalled()
+    })
+
+    test('keeps the chosen directions and comments when re-rendering with an error', async () => {
       const { $ } = await createSession(server).submitForm(
         '/update-risk-level',
         {
-          'direction-asf': 'increase',
-          'direction-hpai': 'same',
-          expertComment: 'Kept comment'
+          ...validFormPayload(),
+          'direction-bluetongue': undefined,
+          'userComment-asf': 'Kept comment'
         }
       )
 
@@ -241,7 +278,10 @@ describe('#routes', () => {
       expect(
         $('input[name="direction-hpai"][value="same"]').attr('checked')
       ).toBeDefined()
-      expect($('textarea#expertComment').text()).toBe('Kept comment')
+      expect($('textarea#userComment-asf').text()).toBe('Kept comment')
+      expect($('textarea#userComment-bluetongue').text()).toBe(
+        'Vector season has ended.'
+      )
       expect(summaryErrors($)).toEqual([
         {
           text: 'Select whether the risk level for Bluetongue increases, decreases or stays the same',
@@ -261,7 +301,7 @@ describe('#routes', () => {
 
       const { $, statusCode } = await createSession(server).submitForm(
         '/update-risk-level',
-        { 'direction-asf': 'increase', expertComment: 'Comment' }
+        { 'direction-asf': 'increase', 'userComment-asf': 'Comment' }
       )
 
       expect(statusCode).toBe(statusCodes.badRequest)
@@ -307,7 +347,7 @@ describe('#routes', () => {
       expect(headers.location).toBe('/update-risk-level')
     })
 
-    test('shows a card for each disease with its current level, direction and new level', async () => {
+    test('shows a card for each disease with its current level, direction, new level and comment', async () => {
       const session = createSession(server)
       await session.submitForm('/update-risk-level', validFormPayload())
 
@@ -330,22 +370,30 @@ describe('#routes', () => {
         'Highly pathogenic avian influenza',
         'Bluetongue'
       ])
-      expect(firstCard).toEqual(['Medium', 'Increase', 'High'])
+      expect(firstCard).toEqual([
+        'Medium',
+        'Increase',
+        'High',
+        'New outbreaks reported in domestic pigs.'
+      ])
     })
 
-    test('shows the expert comment with a link back to the form', async () => {
+    test("links each disease's answers back to their fields on the form", async () => {
       const session = createSession(server)
       await session.submitForm('/update-risk-level', validFormPayload())
 
       const { $ } = await session.get('/update-risk-level/check-answers')
-      const comment = $('.govuk-summary-list__row').filter(
-        (_, row) => $(row).find('dt').text().trim() === 'Expert comment'
-      )
+      const changeLinks = $('.govuk-summary-list')
+        .first()
+        .find('.govuk-summary-list__actions a')
+        .map((_, link) => $(link).attr('href'))
+        .get()
 
-      expect(comment.find('dd').first().text().trim()).toBe(
-        'New outbreaks reported in domestic pigs.'
-      )
-      expect(comment.find('a').attr('href')).toBe('/update-risk-level')
+      expect(changeLinks).toEqual([
+        '/update-risk-level#direction-asf',
+        '/update-risk-level#userComment-asf'
+      ])
+      expect($('.govuk-summary-list')).toHaveLength(3)
     })
 
     test('pre-fills the form with the answers when Change is used', async () => {
@@ -362,8 +410,12 @@ describe('#routes', () => {
           'checked'
         )
       ).toBeDefined()
-      expect($('textarea#expertComment').text()).toBe(
-        'New outbreaks reported in domestic pigs.'
+      expect(
+        currentRiskLevels().map(({ id }) =>
+          $(`textarea#userComment-${id}`).text()
+        )
+      ).toEqual(
+        validRiskLevelChange().changes.map(({ userComment }) => userComment)
       )
     })
   })
@@ -382,15 +434,16 @@ describe('#routes', () => {
       )
     })
 
-    test('never logs the expert comment', async () => {
+    test('never logs any comment', async () => {
       logInfo.mockClear()
       const session = createSession(server)
       await session.submitForm('/update-risk-level', validFormPayload())
       await session.submitForm('/update-risk-level/check-answers', {})
 
-      expect(JSON.stringify(logInfo.mock.calls)).not.toContain(
-        validRiskLevelChange().expertComment
-      )
+      const logged = JSON.stringify(logInfo.mock.calls)
+      for (const { userComment } of validRiskLevelChange().changes) {
+        expect(logged).not.toContain(userComment)
+      }
     })
 
     test('rejects a submission without a CSRF token', async () => {
