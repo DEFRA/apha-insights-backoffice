@@ -14,6 +14,9 @@ const directionItems = (selected) =>
     checked: value === selected
   }))
 
+const errorMessage = (errors, field) =>
+  errors[field] ? { text: errors[field] } : undefined
+
 const diseaseRadios = ({ id, name, currentRiskLevel }, values, errors) => {
   const field = directionFieldName(id)
 
@@ -27,7 +30,7 @@ const diseaseRadios = ({ id, name, currentRiskLevel }, values, errors) => {
       },
       hint: { text: `Current risk level: ${riskLevelText(currentRiskLevel)}` },
       items: directionItems(values.directions?.[id]),
-      errorMessage: errors[field] ? { text: errors[field] } : undefined
+      errorMessage: errorMessage(errors, field)
     }
   }
 }
@@ -56,9 +59,7 @@ export const addDataPresenter = ({ diseases, values = {}, errors = {} }) => {
     expertComment: {
       value: values[COMMENT_FIELD],
       maxLength: COMMENT_MAX_LENGTH,
-      errorMessage: errors[COMMENT_FIELD]
-        ? { text: errors[COMMENT_FIELD] }
-        : undefined
+      errorMessage: errorMessage(errors, COMMENT_FIELD)
     },
     errorList: fields
       .filter((field) => errors[field])
