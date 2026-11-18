@@ -3,6 +3,7 @@ import { createServer } from '#/server.js'
 import { statusCodes } from '#/constants/status-codes.js'
 import {
   getCurrentRiskLevels,
+  getLatestRiskLevelChange,
   submitRiskLevelChange
 } from '#/services/risk-level-service.js'
 import {
@@ -13,6 +14,7 @@ import {
 
 vi.mock('#/services/risk-level-service.js', () => ({
   getCurrentRiskLevels: vi.fn(),
+  getLatestRiskLevelChange: vi.fn(),
   submitRiskLevelChange: vi.fn()
 }))
 
@@ -62,6 +64,17 @@ const linksIn = ($, selector) =>
     .map((_, a) => ({ text: $(a).text().trim(), href: $(a).attr('href') }))
     .get()
 
+const tableRows = ($, panel) =>
+  $(panel)
+    .find('.govuk-table__body .govuk-table__row')
+    .map((_, row) => [
+      $(row)
+        .find('.govuk-table__header, .govuk-table__cell')
+        .map((_, cell) => $(cell).text().trim())
+        .get()
+    ])
+    .get()
+
 const summaryErrors = ($) =>
   $('.govuk-error-summary__list a')
     .map((_, a) => ({ text: $(a).text().trim(), href: $(a).attr('href') }))
@@ -86,6 +99,7 @@ describe('#routes', () => {
 
   beforeEach(() => {
     getCurrentRiskLevels.mockResolvedValue(currentRiskLevels())
+    getLatestRiskLevelChange.mockResolvedValue(null)
     submitRiskLevelChange.mockResolvedValue()
   })
 
@@ -116,6 +130,68 @@ describe('#routes', () => {
       const { $ } = await getPage('/')
 
       expect($('[aria-current="page"]').text().trim()).toBe('Home')
+    })
+
+    test('renders a tab per disease with only the default row when nothing has been submitted', async () => {
+      const { $ } = await getPage('/')
+      const tabs = $('.govuk-tabs__tab')
+        .map((_, tab) => ({
+          text: $(tab).text().trim(),
+          href: $(tab).attr('href')
+        }))
+        .get()
+
+      expect($('main h2').first().text().trim()).toBe('Risk level changes')
+      expect(tabs).toEqual([
+        { text: 'African swine fever', href: '#asf' },
+        { text: 'Highly pathogenic avian influenza', href: '#hpai' },
+        { text: 'Bluetongue', href: '#bluetongue' }
+      ])
+      expect(tableRows($, '#asf')).toEqual([
+        ['Default', 'Medium', '–', '–', '–']
+      ])
+      expect(
+        $('.govuk-tabs__panel')
+          .map((_, panel) => tableRows($, panel).length)
+          .get()
+      ).toEqual([1, 1, 1])
+    })
+
+    test('renders the latest update row in each tab after a change is submitted', async () => {
+      getLatestRiskLevelChange.mockResolvedValue({
+        submittedAt: '2026-11-18T14:30:00.000Z',
+        ...validRiskLevelChange()
+      })
+
+      const { $ } = await getPage('/')
+
+      expect(tableRows($, '#asf')).toEqual([
+        ['Default', 'Medium', '–', '–', '–'],
+        [
+          'Latest update',
+          'High',
+          'Increase',
+          'New outbreaks reported in domestic pigs.',
+          '18 November 2026 at 2:30pm'
+        ]
+      ])
+      expect(tableRows($, '#bluetongue')).toHaveLength(2)
+    })
+
+    test('escapes a comment so it is shown as text and never injected', async () => {
+      const comment = '<script>alert("x")</script>'
+      const [asf] = validRiskLevelChange().changes
+      getLatestRiskLevelChange.mockResolvedValue({
+        submittedAt: '2026-11-18T14:30:00.000Z',
+        changes: [{ ...asf, userComment: comment }]
+      })
+
+      const { $, result } = await getPage('/')
+
+      expect(tableRows($, '#asf')[1][3]).toBe(comment)
+      expect($('#asf script')).toHaveLength(0)
+      expect(result).not.toContain(comment)
+      expect(result).toContain('&lt;script&gt;')
     })
   })
 
