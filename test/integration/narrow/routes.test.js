@@ -1,4 +1,5 @@
 import * as cheerio from 'cheerio'
+import { config } from '#/config/config.js'
 import { createServer } from '#/server.js'
 import { statusCodes } from '#/constants/status-codes.js'
 import {
@@ -110,6 +111,33 @@ describe('#routes', () => {
   }
 
   describe('GET /', () => {
+    test('shows the service in development banner', async () => {
+      const { $ } = await getPage('/')
+
+      expect($('[data-testid="phase-banner"] .govuk-tag').text().trim()).toBe(
+        'Alpha'
+      )
+      expect(
+        $('[data-testid="phase-banner"] .govuk-phase-banner__text')
+          .text()
+          .trim()
+      ).toBe(
+        'This service is in development. All the data shown is test data, not real information about diseases and risks.'
+      )
+    })
+
+    test('hides the service in development banner when disabled', async () => {
+      config.set('serviceInDevelopmentBanner.enabled', false)
+
+      try {
+        const { $ } = await getPage('/')
+
+        expect($('[data-testid="phase-banner"]')).toHaveLength(0)
+      } finally {
+        config.set('serviceInDevelopmentBanner.enabled', true)
+      }
+    })
+
     test('renders the home page', async () => {
       const { $, statusCode } = await getPage('/')
 

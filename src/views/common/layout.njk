@@ -6,6 +6,7 @@
 
 {# Import custom components globally #}
 {% from "components/heading/macro.njk" import appHeading %}
+{% from "components/phase-banner/macro.njk" import appPhaseBanner %}
 
 {% set mainClasses = "app-main-wrapper" %}
 
@@ -59,6 +60,10 @@
 {% endblock %}
 
 {% block beforeContent %}
+  {% if serviceInDevelopmentBanner.enabled %}
+    {{ appPhaseBanner(serviceInDevelopmentBanner) }}
+  {% endif %}
+
   {% if breadcrumbs.length > 1 %}
     {{ govukBreadcrumbs({
       items: breadcrumbs

@@ -32,6 +32,11 @@ export function context(request) {
     assetPath: `${assetPath}/assets`,
     serviceName: config.get('serviceDisplayName'),
     serviceUrl: '/',
+    serviceInDevelopmentBanner: {
+      enabled: config.get('serviceInDevelopmentBanner.enabled'),
+      tag: config.get('serviceInDevelopmentBanner.tag'),
+      text: config.get('serviceInDevelopmentBanner.text')
+    },
     cookieName: config.get('cookieConsent.name'),
     googleTagManagerKey,
     breadcrumbs: [],

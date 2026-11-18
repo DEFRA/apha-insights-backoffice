@@ -73,7 +73,12 @@ describe('context and cache', () => {
             }
           ],
           serviceName: 'IDM Insights',
-          serviceUrl: '/'
+          serviceUrl: '/',
+          serviceInDevelopmentBanner: {
+            enabled: true,
+            tag: 'Alpha',
+            text: 'This service is in development. All the data shown is test data, not real information about diseases and risks.'
+          }
         })
       })
 
@@ -162,7 +167,12 @@ describe('context and cache', () => {
             }
           ],
           serviceName: 'IDM Insights',
-          serviceUrl: '/'
+          serviceUrl: '/',
+          serviceInDevelopmentBanner: {
+            enabled: true,
+            tag: 'Alpha',
+            text: 'This service is in development. All the data shown is test data, not real information about diseases and risks.'
+          }
         })
       })
     })
