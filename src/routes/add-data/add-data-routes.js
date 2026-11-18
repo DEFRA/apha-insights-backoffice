@@ -83,7 +83,11 @@ const postCheckAnswers = {
       return h.redirect(ADD_DATA_PATH)
     }
 
-    request.logger.info({ riskLevelChange }, 'Risk level change submitted')
+    // The expert comment is free text that may name people or premises, so it is never logged
+    const summary = riskLevelChange.changes
+      .map(({ id, direction }) => `${id}:${direction}`)
+      .join(', ')
+    request.logger.info(`Risk level change submitted for ${summary}`)
     await submitRiskLevelChange(riskLevelChange)
     request.yar.clear(SESSION_KEY)
 

@@ -350,7 +350,7 @@ describe('#routes', () => {
   })
 
   describe('POST /add-data/check-answers', () => {
-    test('logs and submits the checked answers once, then shows the confirmation page', async () => {
+    test('logs and submits the checked answers once', async () => {
       logInfo.mockClear()
       const session = createSession(server)
       await session.submitForm('/add-data', validFormPayload())
@@ -359,8 +359,18 @@ describe('#routes', () => {
       expect(submitRiskLevelChange).toHaveBeenCalledTimes(1)
       expect(submitRiskLevelChange).toHaveBeenCalledWith(validRiskLevelChange())
       expect(logInfo).toHaveBeenCalledWith(
-        { riskLevelChange: validRiskLevelChange() },
-        'Risk level change submitted'
+        'Risk level change submitted for asf:increase, hpai:same, bluetongue:decrease'
+      )
+    })
+
+    test('never logs the expert comment', async () => {
+      logInfo.mockClear()
+      const session = createSession(server)
+      await session.submitForm('/add-data', validFormPayload())
+      await session.submitForm('/add-data/check-answers', {})
+
+      expect(JSON.stringify(logInfo.mock.calls)).not.toContain(
+        validRiskLevelChange().expertComment
       )
     })
 
