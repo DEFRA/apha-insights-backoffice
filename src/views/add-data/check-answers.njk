@@ -1,0 +1,37 @@
+{% extends 'common/layout.njk' %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      {{ appHeading({
+        text: heading
+      }) }}
+
+      {% for disease in diseases %}
+        {{ govukSummaryList({
+          card: {
+            title: {
+              text: disease.title
+            }
+          },
+          rows: disease.rows
+        }) }}
+      {% endfor %}
+
+      {{ govukSummaryList({
+        rows: comment.rows
+      }) }}
+
+      <form action="/add-data/check-answers" method="post" novalidate>
+        <input type="hidden" name="crumb" value="{{ crumb }}">
+
+        {{ govukButton({
+          text: "Submit",
+          preventDoubleClick: true
+        }) }}
+      </form>
+    </div>
+  </div>
+{% endblock %}

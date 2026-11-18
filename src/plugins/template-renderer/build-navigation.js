@@ -1,4 +1,7 @@
-const NAVIGATION_ITEMS = [{ text: 'Home', href: '/' }]
+const NAVIGATION_ITEMS = [
+  { text: 'Home', href: '/' },
+  { text: 'Add new data', href: '/add-data' }
+]
 
 /**
  * Builds the service navigation items, marking the current page
