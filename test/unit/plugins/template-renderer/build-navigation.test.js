@@ -13,6 +13,11 @@ describe('#buildNavigation', () => {
         current: false,
         text: 'Home',
         href: '/'
+      },
+      {
+        current: false,
+        text: 'Add new data',
+        href: '/add-data'
       }
     ])
   })
@@ -23,6 +28,11 @@ describe('#buildNavigation', () => {
         current: true,
         text: 'Home',
         href: '/'
+      },
+      {
+        current: false,
+        text: 'Add new data',
+        href: '/add-data'
       }
     ])
   })

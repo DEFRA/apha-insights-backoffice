@@ -5,20 +5,24 @@
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=DEFRA_apha-insights-backoffice&metric=coverage)](https://sonarcloud.io/summary/new_code?id=DEFRA_apha-insights-backoffice)
 
 IDM Insights (working name) is the back office frontend for APHA's International Disease Monitoring (IDM) team. IDM
-will use it to record risk level changes and to view the latest risk levels, replacing risk level changes that are
-currently produced by hand and published as PDF reports. This is a skeleton service with no pages beyond the home page
-yet.
+uses it to record risk level changes, replacing risk level changes that are currently produced by hand and published as
+PDF reports. This is a skeleton service: the check your answers step logs a submission but does not send or store it
+until the backend API exists.
 
 It is built on the Core Delivery Platform (CDP) Node.js frontend template and follows the structure of
 [apha-risk-insights-frontend](https://github.com/DEFRA/apha-risk-insights-frontend).
 
-| Route         | Page                              |
-| ------------- | --------------------------------- |
-| `GET /`       | Home                              |
-| `GET /health` | Health check used by the platform |
+| Route                                 | Page                                                                                       |
+| ------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `GET /`                               | Home, with a link to the add data page                                                     |
+| `GET`, `POST /add-data`               | Choose whether each disease's risk level goes up, down or stays, and add an expert comment |
+| `GET`, `POST /add-data/check-answers` | Check the answers, then submit                                                             |
+| `GET /add-data/confirmation`          | Submission received                                                                        |
+| `GET /health`                         | Health check used by the platform                                                          |
 
 The service name shown in the header and page titles is the `serviceDisplayName` default in
-[src/config/config.js](./src/config/config.js).
+[src/config/config.js](./src/config/config.js). The risk level scale is in
+[src/constants/risk-levels.js](./src/constants/risk-levels.js).
 
 - [Requirements](#requirements)
   - [Node.js](#nodejs)

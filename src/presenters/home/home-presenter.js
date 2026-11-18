@@ -8,5 +8,5 @@ export const homePresenter = () => ({
   pageTitle: 'Home',
   heading: config.get('serviceDisplayName'),
   intro: 'Record risk level changes and view the latest data.',
-  links: []
+  links: [{ text: 'Add new data', href: '/add-data' }]
 })

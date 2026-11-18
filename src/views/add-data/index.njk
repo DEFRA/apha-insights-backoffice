@@ -1,0 +1,53 @@
+{% extends 'common/layout.njk' %}
+{% from "govuk/components/radios/macro.njk" import govukRadios %}
+{% from "govuk/components/character-count/macro.njk" import govukCharacterCount %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      {% if errorList.length %}
+        {{ govukErrorSummary({
+          titleText: "There is a problem",
+          errorList: errorList
+        }) }}
+      {% endif %}
+
+      {{ appHeading({
+        text: heading
+      }) }}
+
+      <p class="govuk-body">{{ intro }}</p>
+
+      <form action="/add-data" method="post" novalidate>
+        <input type="hidden" name="crumb" value="{{ crumb }}">
+
+        {% for disease in diseases %}
+          {{ govukRadios(disease.radios) }}
+        {% endfor %}
+
+        {{ govukCharacterCount({
+          name: "expertComment",
+          id: "expertComment",
+          label: {
+            text: "Expert comment",
+            classes: "govuk-label--m"
+          },
+          hint: {
+            text: "Give the reasons for the changes."
+          },
+          maxlength: expertComment.maxLength,
+          rows: 8,
+          value: expertComment.value,
+          errorMessage: expertComment.errorMessage
+        }) }}
+
+        {{ govukButton({
+          text: "Continue",
+          preventDoubleClick: true
+        }) }}
+      </form>
+    </div>
+  </div>
+{% endblock %}

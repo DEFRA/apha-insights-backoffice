@@ -65,6 +65,11 @@ describe('context and cache', () => {
               current: true,
               text: 'Home',
               href: '/'
+            },
+            {
+              current: false,
+              text: 'Add new data',
+              href: '/add-data'
             }
           ],
           serviceName: 'IDM Insights',
@@ -149,6 +154,11 @@ describe('context and cache', () => {
               current: true,
               text: 'Home',
               href: '/'
+            },
+            {
+              current: false,
+              text: 'Add new data',
+              href: '/add-data'
             }
           ],
           serviceName: 'IDM Insights',
