@@ -1,0 +1,6 @@
+services:
+  apha-insights-backoffice:
+    command: npm run dev:debug
+    ports:
+      - '3003:3000'
+      - '9230:9229'

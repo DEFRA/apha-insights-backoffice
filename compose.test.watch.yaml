@@ -1,0 +1,3 @@
+services:
+  apha-insights-backoffice:
+    command: npm run test:watch

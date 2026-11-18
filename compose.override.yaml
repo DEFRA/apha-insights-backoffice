@@ -1,0 +1,13 @@
+services:
+  apha-insights-backoffice:
+    ports:
+      - '3003:3000'
+      - '9230:9229'
+
+  floci:
+    ports:
+      - '4567:4566'
+
+  redis:
+    ports:
+      - '6379:6379'
