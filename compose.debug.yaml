@@ -3,4 +3,4 @@ services:
     command: npm run dev:debug
     ports:
       - '3003:3000'
-      - '9230:9229'
+      - '9231:9229'

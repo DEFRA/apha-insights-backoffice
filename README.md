@@ -216,7 +216,7 @@ A local environment with:
 
 - Floci (replacing Localstack) for AWS services (S3, SQS)
 - Redis
-- This service, in `development` mode at <http://localhost:3003> (debugger on port 9230)
+- This service, in `development` mode at <http://localhost:3003> (debugger on port 9231)
 
 ```bash
 npm run docker:up
