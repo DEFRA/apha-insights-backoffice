@@ -55,4 +55,19 @@ describe('#moveRiskLevel', () => {
   test('Should return null when decreasing from the lowest level', () => {
     expect(moveRiskLevel('very-low', 'decrease')).toBeNull()
   })
+
+  test.each([['increase'], ['decrease'], ['same']])(
+    'Should throw rather than guess a level when the current level is not on the scale (%s)',
+    (direction) => {
+      expect(() => moveRiskLevel('High', direction)).toThrow(
+        'Unknown risk level: High'
+      )
+    }
+  )
+
+  test('Should throw when the direction is unknown', () => {
+    expect(() => moveRiskLevel('medium', 'sideways')).toThrow(
+      'Unknown risk direction: sideways'
+    )
+  })
 })

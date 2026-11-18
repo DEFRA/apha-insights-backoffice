@@ -48,10 +48,18 @@ export function riskDirectionText(value) {
  * @param {string} value - the current risk level
  * @param {string} direction - increase, decrease or same
  * @returns {string | null} the new risk level, or null when the scale has no step that way
+ * @throws {Error} when the current risk level is not on the scale or the direction is unknown
  */
 export function moveRiskLevel(value, direction) {
-  const index =
-    riskLevelValues.indexOf(value) + (DIRECTION_STEPS[direction] ?? 0)
+  const index = riskLevelValues.indexOf(value)
 
-  return riskLevelValues[index] ?? null
+  if (index === -1) {
+    throw new Error(`Unknown risk level: ${value}`)
+  }
+
+  if (!(direction in DIRECTION_STEPS)) {
+    throw new Error(`Unknown risk direction: ${direction}`)
+  }
+
+  return riskLevelValues[index + DIRECTION_STEPS[direction]] ?? null
 }
