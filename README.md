@@ -4,7 +4,21 @@
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=DEFRA_apha-insights-backoffice&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=DEFRA_apha-insights-backoffice)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=DEFRA_apha-insights-backoffice&metric=coverage)](https://sonarcloud.io/summary/new_code?id=DEFRA_apha-insights-backoffice)
 
-Core delivery platform Node.js Frontend Template.
+IDM Insights (working name) is the back office frontend for APHA's International Disease Monitoring (IDM) team. IDM
+will use it to record risk level changes and to view the latest risk levels, replacing risk level changes that are
+currently produced by hand and published as PDF reports. This is a skeleton service with no pages beyond the home page
+yet.
+
+It is built on the Core Delivery Platform (CDP) Node.js frontend template and follows the structure of
+[apha-risk-insights-frontend](https://github.com/DEFRA/apha-risk-insights-frontend).
+
+| Route         | Page                              |
+| ------------- | --------------------------------- |
+| `GET /`       | Home                              |
+| `GET /health` | Health check used by the platform |
+
+The service name shown in the header and page titles is the `serviceDisplayName` default in
+[src/config/config.js](./src/config/config.js).
 
 - [Requirements](#requirements)
   - [Node.js](#nodejs)
@@ -14,6 +28,7 @@ Core delivery platform Node.js Frontend Template.
   - [Setup](#setup)
   - [Development](#development)
   - [Production](#production)
+  - [Testing](#testing)
   - [Npm scripts](#npm-scripts)
   - [Update dependencies](#update-dependencies)
   - [Formatting](#formatting)
@@ -57,7 +72,7 @@ to how services might have a database (or MongoDB). All frontend services are gi
 matches the service name. e.g. `my-service` will have access to everything in Redis that is prefixed with `my-service`.
 
 If your service does not require a session cache to be shared between instances or if you don't require Redis, you can
-disable setting `SESSION_CACHE_ENGINE=false` or changing the default value in `src/config/index.js`.
+disable setting `SESSION_CACHE_ENGINE=false` or changing the default value in `src/config/config.js`.
 
 ## Proxy
 
@@ -86,7 +101,7 @@ npm install
 Install git hooks (optional)
 
 ```bash
-npm run git:hooks
+npm run setup:husky
 ```
 
 ### Development
@@ -97,12 +112,38 @@ To run the application in `development` mode run:
 npm run dev
 ```
 
+The service runs at <http://localhost:3000>. To override config defaults, copy [.env.example](./.env.example) to `.env`.
+
 ### Production
 
 To mimic the application running in `production` mode locally run:
 
 ```bash
 npm start
+```
+
+### Testing
+
+Tests live in `test/`: `test/unit/` mirrors `src/`, and `test/integration/narrow/` exercises the routes through
+`server.inject()`.
+
+To run the tests with coverage, then the linters:
+
+```bash
+npm test
+npm run lint
+```
+
+To re-run tests as files change:
+
+```bash
+npm run test:watch
+```
+
+To run the tests in Docker, as CI does:
+
+```bash
+npm run docker:test
 ```
 
 ### Npm scripts
@@ -152,7 +193,7 @@ docker build --target development --no-cache --tag apha-insights-backoffice:deve
 Run:
 
 ```bash
-docker run -p 3000:3000 apha-insights-backoffice:development
+docker run -p 3003:3000 apha-insights-backoffice:development
 ```
 
 ### Production image
@@ -166,7 +207,7 @@ docker build --no-cache --tag apha-insights-backoffice .
 Run:
 
 ```bash
-docker run -p 3000:3000 apha-insights-backoffice
+docker run -p 3003:3000 apha-insights-backoffice
 ```
 
 ### Docker Compose
@@ -175,12 +216,10 @@ A local environment with:
 
 - Floci (replacing Localstack) for AWS services (S3, SQS)
 - Redis
-- MongoDB
-- This service.
-- A commented out backend example.
+- This service, in `development` mode at <http://localhost:3003> (debugger on port 9230)
 
 ```bash
-docker compose up --build -d
+npm run docker:up
 ```
 
 ### Dependabot

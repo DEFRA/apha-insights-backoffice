@@ -46,6 +46,11 @@ export const config = convict({
     format: String,
     default: 'apha-insights-backoffice'
   },
+  serviceDisplayName: {
+    doc: 'Service name shown to users in the header, page titles and home page. Placeholder until the name is final',
+    format: String,
+    default: 'IDM Insights'
+  },
   root: {
     doc: 'Project root',
     format: String,

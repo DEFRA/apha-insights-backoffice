@@ -5,8 +5,10 @@ export default defineConfig({
     globals: true,
     environment: 'node',
     clearMocks: true,
+    include: ['test/**/*.test.js'],
     coverage: {
       provider: 'v8',
+      clean: false,
       reportsDirectory: './coverage',
       reporter: ['text', 'lcov'],
       include: ['src/**/*.js'],

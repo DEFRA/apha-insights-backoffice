@@ -2,13 +2,12 @@ name: Check Pull Request
 
 on:
   pull_request:
-    branches:
-      - main
     types:
       - opened
       - reopened
       - synchronize
       - ready_for_review
+      - edited
 
 jobs:
   pr-validator:
@@ -29,15 +28,16 @@ jobs:
 
       - run: |
           npm ci
-          npm run build:frontend
           npm run format:check
           npm run lint
-          npm test
+          mkdir -p coverage
+          chmod -R a+rw ./coverage
+          docker compose -p apha-insights-backoffice-test -f compose.yaml -f compose.test.yaml run --build --rm apha-insights-backoffice
 
       - name: Test Docker Image Build
         run: |
           set +e
-          docker build --no-cache --tag cdp-node-frontend-template .
+          docker build --no-cache --tag apha-insights-backoffice .
           exit $?
 
 #      - name: SonarCloud Scan
