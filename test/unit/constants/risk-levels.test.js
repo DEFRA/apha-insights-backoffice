@@ -8,6 +8,7 @@ import {
 describe('#riskLevels', () => {
   test('Should expose the value of every level, lowest first', () => {
     expect(riskLevelValues).toEqual([
+      'negligible',
       'very-low',
       'low',
       'medium',
@@ -21,7 +22,7 @@ describe('#riskLevels', () => {
   })
 
   test('Should fall back to the value when it is not on the scale', () => {
-    expect(riskLevelText('negligible')).toBe('negligible')
+    expect(riskLevelText('unknown')).toBe('unknown')
   })
 })
 
@@ -53,7 +54,11 @@ describe('#moveRiskLevel', () => {
   })
 
   test('Should return null when decreasing from the lowest level', () => {
-    expect(moveRiskLevel('very-low', 'decrease')).toBeNull()
+    expect(moveRiskLevel('negligible', 'decrease')).toBeNull()
+  })
+
+  test('Should step down from very low to negligible', () => {
+    expect(moveRiskLevel('very-low', 'decrease')).toBe('negligible')
   })
 
   test.each([['increase'], ['decrease'], ['same']])(

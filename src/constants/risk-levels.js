@@ -3,6 +3,7 @@
  * Placeholder scale: confirm with the IDM team before relying on it.
  */
 export const riskLevels = [
+  { value: 'negligible', text: 'Negligible' },
   { value: 'very-low', text: 'Very low' },
   { value: 'low', text: 'Low' },
   { value: 'medium', text: 'Medium' },

@@ -81,7 +81,7 @@ describe('#validateRiskLevelChange', () => {
   test('Should reject decreasing a disease that is already at the lowest level', () => {
     expect(
       errorsFor({ 'direction-bluetongue': 'decrease' }, [
-        { id: 'bluetongue', name: 'Bluetongue', currentRiskLevel: 'very-low' }
+        { id: 'bluetongue', name: 'Bluetongue', currentRiskLevel: 'negligible' }
       ])
     ).toEqual({
       'direction-bluetongue':
