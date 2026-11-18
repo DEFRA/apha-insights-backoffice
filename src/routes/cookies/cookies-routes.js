@@ -2,6 +2,7 @@ import Joi from 'joi'
 import { config } from '#/config/config.js'
 import { isSafeRedirect } from '#/utils/is-safe-redirect.js'
 import { updatePolicy } from '#/utils/cookie-policy-manager.js'
+import { cookiesPresenter } from '#/presenters/cookies/cookies-presenter.js'
 
 export const cookiePolicyController = {
   method: 'GET',
@@ -14,13 +15,13 @@ export const cookiePolicyController = {
     }
   },
   handler: function (request, h) {
-    return h.view('cookies/policy', {
-      pageTitle: 'Cookies',
-      ...cookiesModel(
+    return h.view(
+      'cookies/policy',
+      cookiesPresenter(
         request.query.updated,
         request.state[config.get('cookieConsent.name')]
       )
-    })
+    )
   }
 }
 
@@ -55,34 +56,6 @@ export const updateCookiePreferencesController = {
     // so the browser lands on a GET, preventing the ERR_CACHE_MISS / form
     // resubmit dialog when the user later clicks Back.
     return h.redirect('/cookies?updated=true')
-  }
-}
-
-export function cookiesModel(updated, cookiesPolicy = {}) {
-  return {
-    analytics: {
-      idPrefix: 'analytics',
-      name: 'analytics',
-      fieldset: {
-        legend: {
-          text: 'Do you want to accept analytics cookies?',
-          classes: 'govuk-fieldset__legend--s'
-        }
-      },
-      items: [
-        {
-          value: true,
-          text: 'Yes',
-          checked: cookiesPolicy.analytics
-        },
-        {
-          value: false,
-          text: 'No',
-          checked: !cookiesPolicy.analytics
-        }
-      ]
-    },
-    updated
   }
 }
 
