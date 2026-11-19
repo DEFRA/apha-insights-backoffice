@@ -1,0 +1,11 @@
+{% from "govuk/components/phase-banner/macro.njk" import govukPhaseBanner %}
+
+{{ govukPhaseBanner({
+  tag: {
+    text: params.tag
+  },
+  text: params.text,
+  attributes: {
+    "data-testid": "phase-banner"
+  }
+}) }}

@@ -51,6 +51,25 @@ export const config = convict({
     format: String,
     default: 'IDM Insights'
   },
+  serviceInDevelopmentBanner: {
+    enabled: {
+      doc: 'Show the banner stating the service is in development and uses test data',
+      format: Boolean,
+      default: true,
+      env: 'SHOW_IN_DEVELOPMENT_BANNER'
+    },
+    tag: {
+      doc: 'Phase tag shown at the start of the in development banner',
+      format: String,
+      default: 'Alpha'
+    },
+    text: {
+      doc: 'Text shown in the in development banner',
+      format: String,
+      default:
+        'This service is in development. All the data shown is test data, not real information about diseases and risks.'
+    }
+  },
   root: {
     doc: 'Project root',
     format: String,
