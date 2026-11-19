@@ -1,8 +1,8 @@
 import { riskDirections, riskLevelText } from '#/constants/risk-levels.js'
 import {
-  COMMENT_FIELD,
-  COMMENT_MAX_LENGTH,
-  directionFieldName
+  USER_COMMENT_MAX_LENGTH,
+  directionFieldName,
+  userCommentFieldName
 } from '#/schemas/risk-level-change-schema.js'
 
 const PAGE_TITLE = 'Update risk level'
@@ -17,8 +17,9 @@ const directionItems = (selected) =>
 const errorMessage = (errors, field) =>
   errors[field] ? { text: errors[field] } : undefined
 
-const diseaseRadios = ({ id, name, currentRiskLevel }, values, errors) => {
+const diseaseFields = ({ id, name, currentRiskLevel }, values, errors) => {
   const field = directionFieldName(id)
+  const commentField = userCommentFieldName(id)
 
   return {
     name,
@@ -31,6 +32,14 @@ const diseaseRadios = ({ id, name, currentRiskLevel }, values, errors) => {
       hint: { text: `Current risk level: ${riskLevelText(currentRiskLevel)}` },
       items: directionItems(values.directions?.[id]),
       errorMessage: errorMessage(errors, field)
+    },
+    userComment: {
+      id: commentField,
+      name: commentField,
+      label: { text: `Comment for ${name}`, classes: 'govuk-label--s' },
+      maxlength: USER_COMMENT_MAX_LENGTH,
+      value: values.userComments?.[id],
+      errorMessage: errorMessage(errors, commentField)
     }
   }
 }
@@ -49,22 +58,17 @@ export const updateRiskLevelPresenter = ({
   errors = {}
 }) => {
   const hasErrors = Object.keys(errors).length > 0
-  const fields = [
-    ...diseases.map(({ id }) => directionFieldName(id)),
-    COMMENT_FIELD
-  ]
+  const fields = diseases.flatMap(({ id }) => [
+    directionFieldName(id),
+    userCommentFieldName(id)
+  ])
 
   return {
     pageTitle: hasErrors ? `Error: ${PAGE_TITLE}` : PAGE_TITLE,
     heading: PAGE_TITLE,
     intro:
-      'For each disease, select whether its risk level should increase, decrease or stay the same.',
-    diseases: diseases.map((disease) => diseaseRadios(disease, values, errors)),
-    expertComment: {
-      value: values[COMMENT_FIELD],
-      maxLength: COMMENT_MAX_LENGTH,
-      errorMessage: errorMessage(errors, COMMENT_FIELD)
-    },
+      'For each disease, select whether its risk level should increase, decrease or stay the same, and add a comment.',
+    diseases: diseases.map((disease) => diseaseFields(disease, values, errors)),
     errorList: fields
       .filter((field) => errors[field])
       .map((field) => ({ text: errors[field], href: `#${field}` }))

@@ -20,10 +20,6 @@
         }) }}
       {% endfor %}
 
-      {{ govukSummaryList({
-        rows: comment.rows
-      }) }}
-
       <form action="/update-risk-level/check-answers" method="post" novalidate>
         <input type="hidden" name="crumb" value="{{ crumb }}">
 

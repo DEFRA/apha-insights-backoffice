@@ -2,8 +2,7 @@ import Joi from 'joi'
 
 import { moveRiskLevel, riskDirections } from '#/constants/risk-levels.js'
 
-export const COMMENT_FIELD = 'expertComment'
-export const COMMENT_MAX_LENGTH = 2000
+export const USER_COMMENT_MAX_LENGTH = 500
 
 const DIRECTION_VALUES = riskDirections.map(({ value }) => value)
 
@@ -13,6 +12,13 @@ const DIRECTION_VALUES = riskDirections.map(({ value }) => value)
  * @returns {string}
  */
 export const directionFieldName = (diseaseId) => `direction-${diseaseId}`
+
+/**
+ * The form field holding a disease's comment
+ * @param {string} diseaseId
+ * @returns {string}
+ */
+export const userCommentFieldName = (diseaseId) => `userComment-${diseaseId}`
 
 const directionMessage = (name) =>
   `Select whether the risk level for ${name} increases, decreases or stays the same`
@@ -32,39 +38,41 @@ const directionSchema = (name) =>
       'any.only': directionMessage(name)
     })
 
-const commentSchema = Joi.string()
-  .trim()
-  .required()
-  // Browsers submit line breaks as CRLF, but the character count treats each as one character
-  .replace(/\r\n/g, '\n')
-  .max(COMMENT_MAX_LENGTH)
-  .messages({
-    'any.required': 'Enter your expert comment',
-    'string.empty': 'Enter your expert comment',
-    'string.max': `Expert comment must be ${COMMENT_MAX_LENGTH} characters or less`
-  })
+const userCommentSchema = (name) =>
+  Joi.string()
+    .trim()
+    .required()
+    // Browsers submit line breaks as CRLF, but the character count treats each as one character
+    .replace(/\r\n/g, '\n')
+    .max(USER_COMMENT_MAX_LENGTH)
+    .messages({
+      'any.required': `Enter a comment for ${name}`,
+      'string.empty': `Enter a comment for ${name}`,
+      'string.max': `Comment for ${name} must be ${USER_COMMENT_MAX_LENGTH} characters or less`
+    })
 
 const buildSchema = (diseases) =>
-  Joi.object({
-    ...Object.fromEntries(
-      diseases.map(({ id, name }) => [
-        directionFieldName(id),
-        directionSchema(name)
+  Joi.object(
+    Object.fromEntries(
+      diseases.flatMap(({ id, name }) => [
+        [directionFieldName(id), directionSchema(name)],
+        [userCommentFieldName(id), userCommentSchema(name)]
       ])
-    ),
-    [COMMENT_FIELD]: commentSchema
-  })
+    )
+  )
 
 /**
  * Turns a validated risk level change back into form values, so the form can be pre-filled
- * @param {{changes: object[], expertComment: string}} riskLevelChange
- * @returns {{directions: Record<string, string>, expertComment: string}}
+ * @param {{changes: object[]}} riskLevelChange
+ * @returns {{directions: Record<string, string>, userComments: Record<string, string>}}
  */
-export const toFormValues = ({ changes, expertComment }) => ({
+export const toFormValues = ({ changes }) => ({
   directions: Object.fromEntries(
     changes.map(({ id, direction }) => [id, direction])
   ),
-  expertComment
+  userComments: Object.fromEntries(
+    changes.map(({ id, userComment }) => [id, userComment])
+  )
 })
 
 /**
@@ -89,7 +97,9 @@ export function validateRiskLevelChange(payload, diseases) {
     directions: Object.fromEntries(
       diseases.map(({ id }) => [id, payload[directionFieldName(id)]])
     ),
-    expertComment: payload[COMMENT_FIELD]
+    userComments: Object.fromEntries(
+      diseases.map(({ id }) => [id, payload[userCommentFieldName(id)]])
+    )
   }
 
   const changes = diseases.map(({ id, name, currentRiskLevel }) => {
@@ -105,15 +115,19 @@ export function validateRiskLevelChange(payload, diseases) {
       errors[field] = cannotMoveMessage(name, direction)
     }
 
-    return { id, disease: name, currentRiskLevel, direction, newRiskLevel }
+    return {
+      id,
+      disease: name,
+      currentRiskLevel,
+      direction,
+      newRiskLevel,
+      userComment: value[userCommentFieldName(id)]
+    }
   })
 
   if (Object.keys(errors).length) {
     return { errors, values }
   }
 
-  return {
-    value: { changes, expertComment: value[COMMENT_FIELD] },
-    values
-  }
+  return { value: { changes }, values }
 }

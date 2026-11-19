@@ -11,10 +11,51 @@ describe('#updateRiskLevelPresenter', () => {
     expect(result).toMatchObject({
       pageTitle: 'Update risk level',
       heading: 'Update risk level',
-      expertComment: { value: undefined, maxLength: 2000 },
+      intro:
+        'For each disease, select whether its risk level should increase, decrease or stay the same, and add a comment.',
       errorList: []
     })
     expect(result.diseases).toHaveLength(3)
+  })
+
+  test('Should provide a comment box with a character count for each disease', () => {
+    const result = updateRiskLevelPresenter({ diseases: currentRiskLevels() })
+
+    expect(result.diseases.map(({ userComment }) => userComment)).toEqual([
+      {
+        id: 'userComment-asf',
+        name: 'userComment-asf',
+        label: {
+          text: 'Comment for African swine fever',
+          classes: 'govuk-label--s'
+        },
+        maxlength: 500,
+        value: undefined,
+        errorMessage: undefined
+      },
+      {
+        id: 'userComment-hpai',
+        name: 'userComment-hpai',
+        label: {
+          text: 'Comment for Highly pathogenic avian influenza',
+          classes: 'govuk-label--s'
+        },
+        maxlength: 500,
+        value: undefined,
+        errorMessage: undefined
+      },
+      {
+        id: 'userComment-bluetongue',
+        name: 'userComment-bluetongue',
+        label: {
+          text: 'Comment for Bluetongue',
+          classes: 'govuk-label--s'
+        },
+        maxlength: 500,
+        value: undefined,
+        errorMessage: undefined
+      }
+    ])
   })
 
   test('Should show the disease and its current risk level in each radio group', () => {
@@ -40,12 +81,12 @@ describe('#updateRiskLevelPresenter', () => {
     ])
   })
 
-  test('Should keep the submitted directions and comment', () => {
+  test('Should keep the submitted directions and comments', () => {
     const result = updateRiskLevelPresenter({
       diseases: currentRiskLevels(),
       values: {
         directions: { asf: 'increase', hpai: 'same', bluetongue: 'decrease' },
-        expertComment: 'Kept'
+        userComments: { asf: 'Kept', hpai: 'Also kept' }
       }
     })
 
@@ -54,16 +95,19 @@ describe('#updateRiskLevelPresenter', () => {
       'same',
       'decrease'
     ])
-    expect(result.expertComment.value).toBe('Kept')
+    expect(result.diseases.map(({ userComment }) => userComment.value)).toEqual(
+      ['Kept', 'Also kept', undefined]
+    )
   })
 
   test('Should present errors inline and in form order for the error summary', () => {
     const result = updateRiskLevelPresenter({
       diseases: currentRiskLevels(),
       errors: {
-        expertComment: 'Enter your expert comment',
+        'userComment-bluetongue': 'Enter a comment for Bluetongue',
         'direction-bluetongue':
           'Select whether the risk level for Bluetongue increases, decreases or stays the same',
+        'userComment-asf': 'Enter a comment for African swine fever',
         'direction-asf':
           'Select whether the risk level for African swine fever increases, decreases or stays the same'
       }
@@ -73,20 +117,28 @@ describe('#updateRiskLevelPresenter', () => {
     expect(result.diseases[0].radios.errorMessage).toEqual({
       text: 'Select whether the risk level for African swine fever increases, decreases or stays the same'
     })
-    expect(result.diseases[1].radios.errorMessage).toBeUndefined()
-    expect(result.expertComment.errorMessage).toEqual({
-      text: 'Enter your expert comment'
+    expect(result.diseases[0].userComment.errorMessage).toEqual({
+      text: 'Enter a comment for African swine fever'
     })
+    expect(result.diseases[1].radios.errorMessage).toBeUndefined()
+    expect(result.diseases[1].userComment.errorMessage).toBeUndefined()
     expect(result.errorList).toEqual([
       {
         text: 'Select whether the risk level for African swine fever increases, decreases or stays the same',
         href: '#direction-asf'
       },
       {
+        text: 'Enter a comment for African swine fever',
+        href: '#userComment-asf'
+      },
+      {
         text: 'Select whether the risk level for Bluetongue increases, decreases or stays the same',
         href: '#direction-bluetongue'
       },
-      { text: 'Enter your expert comment', href: '#expertComment' }
+      {
+        text: 'Enter a comment for Bluetongue',
+        href: '#userComment-bluetongue'
+      }
     ])
   })
 })
