@@ -16,6 +16,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # Full history is required for SonarCloud pull request analysis
 
       - name: Test code and Create Test Coverage Reports
         uses: actions/setup-node@v7
@@ -40,9 +42,9 @@ jobs:
           docker build --no-cache --tag apha-insights-backoffice .
           exit $?
 
-#      - name: SonarCloud Scan
-#        if: github.actor != 'dependabot[bot]'
-#        uses: SonarSource/sonarqube-scan-action@v5.3.1 #  (or check latest version on https://github.com/marketplace/actions/official-sonarqube-scan)
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      - name: SonarCloud Scan
+        if: github.actor != 'dependabot[bot]'
+        uses: SonarSource/sonarqube-scan-action@v8.5.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
