@@ -22,6 +22,11 @@ export const riskDirections = [
   { value: 'same', text: 'Stay the same' }
 ]
 
+/**
+ * The longest comment allowed for each disease
+ */
+export const USER_COMMENT_MAX_LENGTH = 500
+
 const DIRECTION_STEPS = { increase: 1, decrease: -1, same: 0 }
 
 /**

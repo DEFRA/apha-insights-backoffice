@@ -1,6 +1,9 @@
-import { riskDirections, riskLevelText } from '#/constants/risk-levels.js'
 import {
   USER_COMMENT_MAX_LENGTH,
+  riskDirections,
+  riskLevelText
+} from '#/constants/risk-levels.js'
+import {
   directionFieldName,
   userCommentFieldName
 } from '#/schemas/risk-level-change-schema.js'

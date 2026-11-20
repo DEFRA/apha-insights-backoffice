@@ -12,3 +12,5 @@ tsconfig.tsbuildinfo
 .env
 
 .explain/
+.claude/worktrees/
+.claude/settings.local.json
