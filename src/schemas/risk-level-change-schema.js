@@ -1,8 +1,10 @@
 import Joi from 'joi'
 
-import { moveRiskLevel, riskDirections } from '#/constants/risk-levels.js'
-
-export const USER_COMMENT_MAX_LENGTH = 500
+import {
+  USER_COMMENT_MAX_LENGTH,
+  moveRiskLevel,
+  riskDirections
+} from '#/constants/risk-levels.js'
 
 const DIRECTION_VALUES = riskDirections.map(({ value }) => value)
 

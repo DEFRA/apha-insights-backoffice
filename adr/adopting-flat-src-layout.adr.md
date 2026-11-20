@@ -21,7 +21,7 @@ We will restructure `src/` to a flat layout with domain folders, following `apha
 - `src/presenters/<domain>/` holds one pure function per page that turns data into a view model. This applies to the home, cookies and error pages, even though the home and error pages are static.
 - `src/views/` holds Nunjucks templates, with `common/` for the layout and `components/` for reusable macros.
 - `src/utils/` holds runtime helpers, including the logger, error handling and caching. Runtime code does not go in `src/config/`.
-- `src/constants/` holds status codes.
+- `src/constants/` holds values shared by more than one module, such as status codes and the risk level scale.
 - `src/config/` holds the convict config. It stays as one file, `config.js`, with flat keys.
 - Tests live in a separate `test/` tree. `test/unit/` mirrors `src/`, `test/integration/narrow/` uses `server.inject()`, and `test/helpers/` holds shared support code, imported through the `#test/` alias.
 
