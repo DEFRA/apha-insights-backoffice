@@ -1,4 +1,5 @@
 import neostandard from 'neostandard'
+import sonarjs from 'eslint-plugin-sonarjs'
 
 export default [
   {
@@ -15,6 +16,11 @@ export default [
     noJsx: true,
     noStyle: true
   }),
+  sonarjs.configs.recommended,
+  {
+    // SonarCloud treats to-do comments as informational, so they warn rather than fail
+    rules: { 'sonarjs/todo-tag': 'warn' }
+  },
   {
     files: ['src/**/*.js'],
     ignores: ['src/config/**', 'src/client/**'],

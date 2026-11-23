@@ -44,6 +44,12 @@
             "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/lint-shell-changes.sh check",
             "timeout": 60,
             "statusMessage": "Linting files changed by command"
+          },
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/check-sonar-after-push.sh",
+            "timeout": 900,
+            "asyncRewake": true
           }
         ]
       }

@@ -9,8 +9,10 @@ It is a skeleton: `src/services/risk-level-service.js` is a stub until the backe
 Run these and fix any failures. CI runs lint and format checks on every pull request, and a pull request cannot merge until they pass.
 
 - `npm test`
-- `npm run lint` (fix with `npm run lint:js:fix`)
+- `npm run lint`: ESLint with SonarCloud's JavaScript rules, stylelint, and ShellCheck (fix JavaScript with `npm run lint:js:fix`)
 - `npm run format:check` (fix with `npm run format`)
+
+SonarCloud also scans every pull request. In Claude Code, a background hook reports a failed quality gate after you push.
 
 ## Contents
 

@@ -1,3 +1,4 @@
+# shellcheck shell=sh
 # Rejects commit messages that do not follow Conventional Commits, see docs/conventions.md
 header=$(grep -v '^#' "$1" | grep -m 1 .)
 

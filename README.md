@@ -104,6 +104,8 @@ npm install
 
 `npm install` sets up two git hooks. The pre-commit hook runs `npm run format:check` and `npm run lint`. The commit-msg hook rejects messages that do not follow [Conventional Commits](https://www.conventionalcommits.org/). Tests and the dependency audit run in CI.
 
+`npm run lint` checks shell scripts with [ShellCheck](https://www.shellcheck.net/). Install it with `brew install shellcheck`. Without it, the check is skipped locally but still runs in CI.
+
 If the hook is missing, for example in a clone made before this change, set it up with:
 
 ```bash
