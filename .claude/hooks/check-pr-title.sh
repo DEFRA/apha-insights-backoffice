@@ -2,17 +2,7 @@
 # Blocks `gh pr create` and `gh pr edit` when --title is not a Conventional Commits message.
 # PRs are squash-merged, so the title becomes the commit on main. Exit code 2 sends the reason back to Claude.
 
-# The single-quoted block is JavaScript for Node, so $ inside it must not expand
-# shellcheck disable=SC2016
-title=$(node -e '
-let s = ""
-process.stdin.on("data", (d) => (s += d)).on("end", () => {
-  const command = JSON.parse(s).tool_input?.command ?? ""
-  if (!/\bgh\s+pr\s+(create|edit)\b/.test(command)) return
-  const m = command.match(/(?:^|\s)(?:--title|-t)(?:=|\s+)(?:"((?:[^"\\]|\\.)*)"|'"'"'([^'"'"']*)'"'"'|(\S+))/)
-  if (!m) return
-  process.stdout.write((m[1]?.replace(/\\(.)/g, "$1")) ?? m[2] ?? m[3])
-})')
+title=$(node "$(dirname "$0")/extract-pr-title.js")
 
 [[ -n "$title" ]] || exit 0
 

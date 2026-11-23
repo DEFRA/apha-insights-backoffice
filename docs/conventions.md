@@ -2,6 +2,15 @@
 
 Coding conventions that apply across the repo. Rules marked _(enforced)_ are checked automatically by ESLint, Prettier or a git hook.
 
+## Lint and hook setup
+
+- Do not switch off rules with comments such as `eslint-disable`, `shellcheck disable`, `stylelint-disable` or `NOSONAR`. ESLint ignores inline directives, and `npm run lint` fails on all of them _(enforced)_
+- A justified exception goes in the tool's config file, where it is reviewed
+- Claude Code cannot change these, and reverts any change made through a shell command _(enforced)_:
+  - `eslint.config.js`, `stylelint.config.js`, `.prettierrc.js`, `.prettierignore`, `.shellcheckrc`, `sonar-project.properties`
+  - `.claude/settings.json`, `.claude/hooks/`, `.husky/pre-commit`, `.husky/commit-msg`, `scripts/`, `.github/workflows/`
+  - the `scripts` section of `package.json`, and git's `core.hooksPath`
+
 ## Modules
 
 - ES modules, plain JavaScript with JSDoc for types

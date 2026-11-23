@@ -6,6 +6,11 @@ file=$(node -e 'let s = ""; process.stdin.on("data", (d) => (s += d)).on("end", 
 
 cd "${CLAUDE_PROJECT_DIR:-.}" || exit 0
 
+if ! output=$(scripts/check-suppressions.sh "$file" 2>&1); then
+  echo "$output" >&2
+  exit 2
+fi
+
 case "$file" in
   *.js | *.cjs | *.mjs)
     [[ -x node_modules/.bin/eslint ]] || exit 0

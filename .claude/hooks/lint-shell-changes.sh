@@ -13,10 +13,12 @@ fi
 
 [[ -f "$marker" ]] || exit 0
 
+all_files=()
 js_files=()
 shell_files=()
 while IFS= read -r file; do
   [[ -f "$file" && -n "$(find "$file" -newer "$marker")" ]] || continue
+  all_files+=("$file")
   case "$file" in
     *.js | *.cjs | *.mjs) js_files+=("$file") ;;
     *.sh | .husky/pre-commit | .husky/commit-msg) shell_files+=("$file") ;;
@@ -25,6 +27,9 @@ while IFS= read -r file; do
 done < <({ git diff --name-only HEAD; git ls-files --others --exclude-standard; } | sort -u)
 
 output=""
+if [[ ${#all_files[@]} -gt 0 ]]; then
+  output+=$(scripts/check-suppressions.sh "${all_files[@]}" 2>&1) || failed=1
+fi
 if [[ ${#js_files[@]} -gt 0 && -x node_modules/.bin/eslint ]]; then
   output+=$(node_modules/.bin/eslint --no-warn-ignored "${js_files[@]}" 2>&1) || failed=1
 fi

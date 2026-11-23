@@ -3,6 +3,14 @@ import sonarjs from 'eslint-plugin-sonarjs'
 
 export default [
   {
+    // Inline ESLint directive comments have no effect. Exceptions belong in this file, where they are reviewed
+    linterOptions: { noInlineConfig: true }
+  },
+  {
+    files: ['src/client/**/*.js'],
+    languageOptions: { globals: { XMLHttpRequest: 'readonly' } }
+  },
+  {
     ignores: [
       'coverage/**',
       '.cache/**',
