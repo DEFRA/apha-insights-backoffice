@@ -93,6 +93,17 @@
           }
         ]
       }
+    ],
+    "PermissionDenied": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"$CLAUDE_PROJECT_DIR\" && node scripts/log-harness-event.js --layer claude-deny --check auto-mode --outcome blocked --rule-from-reason 2>/dev/null; exit 0",
+            "timeout": 10
+          }
+        ]
+      }
     ]
   }
 }

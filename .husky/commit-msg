@@ -1,5 +1,6 @@
 # shellcheck shell=sh
 # Rejects commit messages that do not follow Conventional Commits, see docs/conventions.md
+# A rejection is recorded in the harness event log, see docs/harness.md
 header=$(grep -v '^#' "$1" | grep -m 1 .)
 
 case "$header" in
@@ -11,5 +12,6 @@ if ! printf '%s\n' "$header" | grep -Eq '^(build|chore|ci|docs|feat|fix|perf|ref
   echo "Commit message must follow Conventional Commits: <type>(<optional scope>): <description>" >&2
   echo "Types: build, chore, ci, docs, feat, fix, perf, refactor, revert, style, test" >&2
   echo "Got: $header" >&2
+  node scripts/log-harness-event.js --layer git-hook --check commit-msg --outcome rejected --rule conventional-commits </dev/null 2>/dev/null
   exit 1
 fi

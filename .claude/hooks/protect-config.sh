@@ -4,6 +4,7 @@
 # puts back anything the tool changed, and exit code 2 tells Claude why.
 # Switching branch, pulling or rebasing moves HEAD and is allowed, but a new local commit
 # that touches protected files is reported.
+# Reverts and reports are recorded in the harness event log, see docs/harness.md.
 
 cd "${CLAUDE_PROJECT_DIR:-.}" || exit 0
 store=$(git rev-parse --git-path claude-protected 2>/dev/null) || exit 0
@@ -27,6 +28,11 @@ list_protected_files() {
 
 package_scripts() {
   node -p 'JSON.stringify(require("./package.json").scripts)' 2>/dev/null
+}
+
+# Records the block. The hook payload is still on stdin, so the logger reads the session from it
+log_event() {
+  node scripts/log-harness-event.js --layer claude-hook --check protect-config --rule protected-config "$@" 2>/dev/null
 }
 
 case "$1" in
@@ -53,6 +59,7 @@ old_head=$(cat "$store/head")
 if [[ "$(git rev-parse HEAD)" != "$old_head" ]]; then
   commits=$(git log --oneline "$old_head..HEAD" --not --remotes -- "${protected_paths[@]}" 2>/dev/null)
   [[ -z "$commits" ]] && exit 0
+  log_event --outcome blocked --detail "new commits change protected files"
   echo "These new commits change files that set up linting, hooks or CI, which Claude Code must not change:" >&2
   echo "$commits" >&2
   echo "Tell the user. Do not push them unless the user asks for these changes." >&2
@@ -96,6 +103,7 @@ fi
 
 [[ ${#changed[@]} -eq 0 ]] && exit 0
 
+log_event --outcome reverted "${changed[@]/#/--file=}"
 echo "These set up linting, hooks or CI, so Claude Code must not change them. The change was reverted:" >&2
 printf -- '- %s\n' "${changed[@]}" >&2
 echo "If the change is needed, ask the user to make it." >&2

@@ -16,6 +16,16 @@ SonarCloud also scans every pull request. In Claude Code, a background hook repo
 
 Fix lint and Sonar findings in the code. Do not suppress them with comments, and do not change the lint, hook or CI setup: Claude Code blocks and reverts those changes. If a rule is wrong for a case, tell the user. The protected files are listed in [docs/conventions.md](docs/conventions.md#lint-and-hook-setup).
 
+## Proposing rules
+
+Use the [propose-rule skill](.claude/skills/propose-rule/SKILL.md) to open a GitHub issue for a person to review when:
+
+- a person corrects you, such as a review comment, "undo that" or a reverted change
+- `npm run harness:report` shows the same rule tripped repeatedly
+- you notice a rule in this file or a skill that a tool could check
+
+Not after every session, and not for problems that have not happened.
+
 ## Contents
 
 | When you need to                           | Read                                                     |
@@ -24,5 +34,6 @@ Fix lint and Sonar findings in the code. Do not suppress them with comments, and
 | Follow module, config, UI and git rules    | [docs/conventions.md](docs/conventions.md)               |
 | Add or change logging                      | [ecs-logging skill](.claude/skills/ecs-logging/SKILL.md) |
 | Make a hard-to-reverse decision            | [create-adr skill](.claude/skills/create-adr/SKILL.md)   |
+| See which rules fire, or propose a rule    | [docs/harness.md](docs/harness.md)                       |
 | Understand why things are the way they are | [adr/](adr/)                                             |
 | Run the app locally or in Docker           | [README.md](README.md)                                   |
