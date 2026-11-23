@@ -1,15 +1,17 @@
 import neostandard from 'neostandard'
 
 export default [
-  ...neostandard({
-    env: ['node', 'vitest'],
+  {
     ignores: [
       'coverage/**',
       '.cache/**',
       '.public/**',
       '.explain/**',
       '.claude/worktrees/**'
-    ],
+    ]
+  },
+  ...neostandard({
+    env: ['node', 'vitest'],
     noJsx: true,
     noStyle: true
   }),
