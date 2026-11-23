@@ -10,7 +10,7 @@ case "$file" in
 esac
 
 cd "${CLAUDE_PROJECT_DIR:-.}" || exit 0
-[ -x node_modules/.bin/eslint ] || exit 0
+[[ -x node_modules/.bin/eslint ]] || exit 0
 
 if ! output=$(node_modules/.bin/eslint --no-warn-ignored "$file" 2>&1); then
   echo "ESLint found problems in $file. Fix them before moving on:" >&2

@@ -12,7 +12,7 @@ process.stdin.on("data", (d) => (s += d)).on("end", () => {
   process.stdout.write((m[1]?.replace(/\\(.)/g, "$1")) ?? m[2] ?? m[3])
 })')
 
-[ -n "$title" ] || exit 0
+[[ -n "$title" ]] || exit 0
 
 cd "${CLAUDE_PROJECT_DIR:-.}" || exit 0
 message_file=$(mktemp)
