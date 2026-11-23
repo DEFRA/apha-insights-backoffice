@@ -18,7 +18,6 @@ Run these and fix any failures. The pre-commit hook runs them too.
 | ------------------------------------------ | -------------------------------------------------------- |
 | Know where code or a constant goes         | [docs/code-layout.md](docs/code-layout.md)               |
 | Follow module, config, UI and git rules    | [docs/conventions.md](docs/conventions.md)               |
-| Write tests or build a feature test-first  | [tdd skill](.claude/skills/tdd/SKILL.md)                 |
 | Add or change logging                      | [ecs-logging skill](.claude/skills/ecs-logging/SKILL.md) |
 | Make a hard-to-reverse decision            | [create-adr skill](.claude/skills/create-adr/SKILL.md)   |
 | Understand why things are the way they are | [adr/](adr/)                                             |
