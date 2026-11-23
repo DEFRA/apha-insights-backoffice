@@ -4,7 +4,21 @@
       "Bash(git commit --no-verify*)",
       "Bash(git commit * --no-verify*)",
       "Bash(git commit -n*)",
-      "Edit(/zz-deny-probe.txt)"
+      "Bash(git config core.hooksPath*)",
+      "Bash(git config --unset core.hooksPath*)",
+      "Bash(HUSKY=0 *)",
+      "Edit(/eslint.config.js)",
+      "Edit(/stylelint.config.js)",
+      "Edit(/.prettierrc.js)",
+      "Edit(/.prettierignore)",
+      "Edit(/.shellcheckrc)",
+      "Edit(/sonar-project.properties)",
+      "Edit(/.claude/settings.json)",
+      "Edit(/.claude/hooks/**)",
+      "Edit(/.husky/pre-commit)",
+      "Edit(/.husky/commit-msg)",
+      "Edit(/scripts/**)",
+      "Edit(/.github/workflows/**)"
     ]
   },
   "hooks": {
@@ -12,6 +26,11 @@
       {
         "matcher": "Bash",
         "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/protect-config.sh snapshot",
+            "timeout": 10
+          },
           {
             "type": "command",
             "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/lint-shell-changes.sh start",
@@ -23,12 +42,27 @@
             "timeout": 10
           }
         ]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/protect-config.sh snapshot",
+            "timeout": 10
+          }
+        ]
       }
     ],
     "PostToolUse": [
       {
         "matcher": "Edit|Write|MultiEdit",
         "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/protect-config.sh check",
+            "timeout": 10
+          },
           {
             "type": "command",
             "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/lint-edited-file.sh",
@@ -40,6 +74,11 @@
       {
         "matcher": "Bash",
         "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/protect-config.sh check",
+            "timeout": 10
+          },
           {
             "type": "command",
             "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/lint-shell-changes.sh check",
