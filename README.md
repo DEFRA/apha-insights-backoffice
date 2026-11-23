@@ -102,7 +102,9 @@ npm install
 
 ### Git hooks
 
-Install git hooks (optional)
+`npm install` sets up two git hooks. The pre-commit hook runs `npm run format:check` and `npm run lint`. The commit-msg hook rejects messages that do not follow [Conventional Commits](https://www.conventionalcommits.org/). Tests and the dependency audit run in CI.
+
+If the hook is missing, for example in a clone made before this change, set it up with:
 
 ```bash
 npm run setup:husky

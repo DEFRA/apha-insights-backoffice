@@ -6,7 +6,7 @@ It is a skeleton: `src/services/risk-level-service.js` is a stub until the backe
 
 ## Before you finish
 
-Run these and fix any failures. The pre-commit hook runs them too.
+Run these and fix any failures. CI runs lint and format checks on every pull request, and a pull request cannot merge until they pass.
 
 - `npm test`
 - `npm run lint` (fix with `npm run lint:js:fix`)

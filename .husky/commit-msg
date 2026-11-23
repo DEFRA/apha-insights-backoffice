@@ -1,0 +1,13 @@
+# Rejects commit messages that do not follow Conventional Commits, see docs/conventions.md
+header=$(grep -v '^#' "$1" | grep -m 1 .)
+
+case "$header" in
+  Merge\ * | Revert\ \"* | fixup!\ * | squash!\ * | amend!\ *) exit 0 ;;
+esac
+
+if ! printf '%s\n' "$header" | grep -Eq '^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(\([a-z0-9-]+\))?!?: [^ ]'; then
+  echo "Commit message must follow Conventional Commits: <type>(<optional scope>): <description>" >&2
+  echo "Types: build, chore, ci, docs, feat, fix, perf, refactor, revert, style, test" >&2
+  echo "Got: $header" >&2
+  exit 1
+fi
