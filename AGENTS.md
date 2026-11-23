@@ -6,11 +6,15 @@ It is a skeleton: `src/services/risk-level-service.js` is a stub until the backe
 
 ## Before you finish
 
-Run these and fix any failures. The pre-commit hook runs them too.
+Run these and fix any failures. CI runs lint and format checks on every pull request, and a pull request cannot merge until they pass.
 
 - `npm test`
-- `npm run lint` (fix with `npm run lint:js:fix`)
+- `npm run lint`: ESLint with SonarCloud's JavaScript rules, stylelint, ShellCheck, and a check that rejects rule-suppression comments (fix JavaScript with `npm run lint:js:fix`)
 - `npm run format:check` (fix with `npm run format`)
+
+SonarCloud also scans every pull request. In Claude Code, a background hook reports a failed quality gate after you push.
+
+Fix lint and Sonar findings in the code. Do not suppress them with comments, and do not change the lint, hook or CI setup: Claude Code blocks and reverts those changes. If a rule is wrong for a case, tell the user. The protected files are listed in [docs/conventions.md](docs/conventions.md#lint-and-hook-setup).
 
 ## Contents
 

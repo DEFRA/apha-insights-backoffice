@@ -30,6 +30,9 @@ Each routes file exports an array of route objects. `src/routes/routes.js` combi
 | `test/unit/`        | Unit tests, mirroring `src/`                                             |
 | `test/integration/` | Narrow integration tests that drive the server with `server.inject()`    |
 | `test/helpers/`     | Shared fixtures and test helpers, imported through `#test/`              |
+| `scripts/`          | Repo tooling run by npm scripts, such as `lint-shell.sh`                 |
+| `.claude/`          | Claude Code settings, hooks in `hooks/` and skills in `skills/`          |
+| `.husky/`           | Git hooks: `pre-commit` runs format and lint, `commit-msg` checks format |
 
 ## Constants
 

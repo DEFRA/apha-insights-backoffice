@@ -182,7 +182,7 @@ export default {
     const formElement = cookieContainer.closest('form')
 
     const submitPreference = (accepted, onSuccess) => {
-      const xhr = new XMLHttpRequest() // eslint-disable-line no-undef
+      const xhr = new XMLHttpRequest()
 
       xhr.open('POST', '/cookies', true)
       xhr.setRequestHeader('Content-Type', 'application/json')

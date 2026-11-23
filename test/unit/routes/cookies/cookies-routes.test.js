@@ -39,14 +39,14 @@ describe('Cookies route', () => {
     const response = await server.inject({ method: 'GET', url: '/cookies' })
     const $ = cheerio.load(response.payload)
 
-    expect($('input[name="analytics"]').length).toBe(2)
+    expect($('input[name="analytics"]')).toHaveLength(2)
   })
 
   test('GET /cookies has cookie tables', async () => {
     const response = await server.inject({ method: 'GET', url: '/cookies' })
     const $ = cheerio.load(response.payload)
 
-    expect($('.govuk-table').length).toBe(2)
+    expect($('.govuk-table')).toHaveLength(2)
     expect(response.payload).toContain(config.get('cookieConsent.name'))
     expect(response.payload).toContain('_ga')
   })
@@ -116,7 +116,26 @@ describe('Cookies route', () => {
     expect(result.statusCode).toBe(400)
   })
 
-  test('POST /cookies with valid returnUrl redirects', async () => {
+  test.each([
+    {
+      name: 'valid returnUrl redirects',
+      analytics: true,
+      returnUrl: '/',
+      location: '/'
+    },
+    {
+      name: 'external returnUrl redirects to /cookies?updated=true',
+      analytics: true,
+      returnUrl: 'https://evil.example.com',
+      location: '/cookies?updated=true'
+    },
+    {
+      name: 'protocol-relative returnUrl redirects to /cookies?updated=true',
+      analytics: false,
+      returnUrl: '//evil.example.com',
+      location: '/cookies?updated=true'
+    }
+  ])('POST /cookies with $name', async ({ analytics, returnUrl, location }) => {
     const getResponse = await server.inject({ method: 'GET', url: '/cookies' })
     const $ = cheerio.load(getResponse.payload)
     const cookies = getResponse.headers['set-cookie']
@@ -129,63 +148,15 @@ describe('Cookies route', () => {
         cookie: cookies ? cookies.join(';') : ''
       },
       payload: {
-        analytics: true,
+        analytics,
         async: false,
-        returnUrl: '/',
+        returnUrl,
         crumb
       }
     })
 
     expect(result.statusCode).toBe(302)
-    expect(result.headers.location).toBe('/')
-  })
-
-  test('POST /cookies with external returnUrl redirects to /cookies?updated=true', async () => {
-    const getResponse = await server.inject({ method: 'GET', url: '/cookies' })
-    const $ = cheerio.load(getResponse.payload)
-    const cookies = getResponse.headers['set-cookie']
-    const crumb = $('input[name="crumb"]').val()
-
-    const result = await server.inject({
-      method: 'POST',
-      url: '/cookies',
-      headers: {
-        cookie: cookies ? cookies.join(';') : ''
-      },
-      payload: {
-        analytics: true,
-        async: false,
-        returnUrl: 'https://evil.example.com',
-        crumb
-      }
-    })
-
-    expect(result.statusCode).toBe(302)
-    expect(result.headers.location).toBe('/cookies?updated=true')
-  })
-
-  test('POST /cookies with protocol-relative returnUrl redirects to /cookies?updated=true', async () => {
-    const getResponse = await server.inject({ method: 'GET', url: '/cookies' })
-    const $ = cheerio.load(getResponse.payload)
-    const cookies = getResponse.headers['set-cookie']
-    const crumb = $('input[name="crumb"]').val()
-
-    const result = await server.inject({
-      method: 'POST',
-      url: '/cookies',
-      headers: {
-        cookie: cookies ? cookies.join(';') : ''
-      },
-      payload: {
-        analytics: false,
-        async: false,
-        returnUrl: '//evil.example.com',
-        crumb
-      }
-    })
-
-    expect(result.statusCode).toBe(302)
-    expect(result.headers.location).toBe('/cookies?updated=true')
+    expect(result.headers.location).toBe(location)
   })
 
   test('POST /cookies with returnUrl exceeding 2000 chars returns 400', async () => {
@@ -242,14 +213,14 @@ describe('Cookies route', () => {
     const $ = cheerio.load(response.payload)
 
     expect(response.statusCode).toBe(200)
-    expect($('.govuk-notification-banner--success').length).toBe(1)
+    expect($('.govuk-notification-banner--success')).toHaveLength(1)
   })
 
   test('Cookie banner appears on cookie page when no cookie set', async () => {
     const response = await server.inject({ method: 'GET', url: '/cookies' })
     const $ = cheerio.load(response.payload)
 
-    expect($('.govuk-cookie-banner').length).toBe(1)
+    expect($('.govuk-cookie-banner')).toHaveLength(1)
     expect($('.js-cookies-button-accept').text()).toContain(
       'Accept analytics cookies'
     )

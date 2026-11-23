@@ -1,17 +1,26 @@
 # Conventions
 
-Coding conventions that apply across the repo. Rules marked _(lint)_ are enforced by ESLint or Prettier.
+Coding conventions that apply across the repo. Rules marked _(enforced)_ are checked automatically by ESLint, Prettier or a git hook.
+
+## Lint and hook setup
+
+- Do not switch off rules with comments such as `eslint-disable`, `shellcheck disable`, `stylelint-disable` or `NOSONAR`. ESLint ignores inline directives, and `npm run lint` fails on all of them _(enforced)_
+- A justified exception goes in the tool's config file, where it is reviewed
+- Claude Code cannot change these, and reverts any change made through a shell command _(enforced)_:
+  - `eslint.config.js`, `stylelint.config.js`, `.prettierrc.js`, `.prettierignore`, `.shellcheckrc`, `sonar-project.properties`
+  - `.claude/settings.json`, `.claude/hooks/`, `.husky/pre-commit`, `.husky/commit-msg`, `scripts/`, `.github/workflows/`
+  - the `scripts` section of `package.json`, and git's `core.hooksPath`
 
 ## Modules
 
 - ES modules, plain JavaScript with JSDoc for types
 - Import with the `#/` and `#test/` aliases, never `../`
 - Kebab-case file names
-- Named exports only _(lint)_
+- Named exports only _(enforced)_
 
 ## Configuration
 
-- Read settings through `config.get()` from `#/config/config.js`. Do not read `process.env` anywhere else in `src/` _(lint)_
+- Read settings through `config.get()` from `#/config/config.js`. Do not read `process.env` anywhere else in `src/` _(enforced)_
 - Add new settings to `src/config/config.js` with a default, format and env var name
 
 ## UI
@@ -27,4 +36,5 @@ Coding conventions that apply across the repo. Rules marked _(lint)_ are enforce
 ## Git
 
 - Branch as `<type>/<description>`, for example `feat/risk-level-history`
-- Conventional commit messages: `feat:`, `fix:`, `chore:`, `docs:`, `test:`, `refactor:`
+- Conventional commit messages, `<type>(<optional scope>): <description>`, with type one of `build`, `chore`, `ci`, `docs`, `feat`, `fix`, `perf`, `refactor`, `revert`, `style` or `test` _(enforced)_
+- Pull request titles use the same format, because pull requests are squash-merged and the title becomes the commit on `main`. Claude Code blocks `gh pr create` and `gh pr edit` with a non-conforming `--title`
