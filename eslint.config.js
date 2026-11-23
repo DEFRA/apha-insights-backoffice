@@ -3,7 +3,13 @@ import neostandard from 'neostandard'
 export default [
   ...neostandard({
     env: ['node', 'vitest'],
-    ignores: [...neostandard.resolveIgnoresFromGitignore()],
+    ignores: [
+      'coverage/**',
+      '.cache/**',
+      '.public/**',
+      '.explain/**',
+      '.claude/worktrees/**'
+    ],
     noJsx: true,
     noStyle: true
   }),
