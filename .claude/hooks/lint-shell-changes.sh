@@ -20,6 +20,7 @@ while IFS= read -r file; do
   case "$file" in
     *.js | *.cjs | *.mjs) js_files+=("$file") ;;
     *.sh | .husky/pre-commit | .husky/commit-msg) shell_files+=("$file") ;;
+    *) ;;
   esac
 done < <({ git diff --name-only HEAD; git ls-files --others --exclude-standard; } | sort -u)
 
