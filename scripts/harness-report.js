@@ -17,13 +17,13 @@ const FIRES_OFTEN = 5
 const FILES_SHOWN = 5
 
 // Rules logged by the harness's own checks, rather than by ESLint, ShellCheck or SonarCloud
-const HARNESS_RULES = [
+const HARNESS_RULES = new Set([
   'suppression-comment',
   'conventional-commits',
   'protected-config',
   'format',
   'lint'
-]
+])
 
 // One file from each ESLint config block, so --print-config covers every active rule
 const ESLINT_SAMPLE_PATTERNS = [
@@ -44,12 +44,16 @@ const READINGS = `How to read this:
 
 function parseSince(value) {
   const days = Number(/^(\d+)d$/.exec(value)?.[1])
-  if (!days) throw new Error(`--since must look like 30d, got: ${value}`)
+  if (!days) {
+    throw new Error(`--since must look like 30d, got: ${value}`)
+  }
   return Math.min(days, MAX_AGE_DAYS)
 }
 
 function readEvents(path, cutoff) {
-  if (!existsSync(path)) return []
+  if (!existsSync(path)) {
+    return []
+  }
   return readFileSync(path, 'utf8')
     .split('\n')
     .filter(Boolean)
@@ -65,7 +69,9 @@ function readEvents(path, cutoff) {
 
 function countBy(values) {
   const counts = new Map()
-  for (const value of values) counts.set(value, (counts.get(value) ?? 0) + 1)
+  for (const value of values) {
+    counts.set(value, (counts.get(value) ?? 0) + 1)
+  }
   return [...counts].sort(([, a], [, b]) => b - a)
 }
 
@@ -108,19 +114,21 @@ function plural(count, noun, nouns = `${noun}s`) {
   return `${count} ${count === 1 ? noun : nouns}`
 }
 
-function printSummary(summary) {
-  console.log(`\n${summary.rule}: fired ${plural(summary.fired, 'time')}`)
-  console.log(
+function printSummary(summary, print) {
+  print(`\n${summary.rule}: fired ${plural(summary.fired, 'time')}`)
+  print(
     `  by: ${plural(summary.sessions, 'Claude Code session')}, ${plural(summary.byPeople, 'person', 'people')}`
   )
-  console.log(`  checks: ${summary.checks.join(', ')}`)
+  print(`  checks: ${summary.checks.join(', ')}`)
   if (summary.files.length > 0) {
-    console.log(`  files: ${formatCounts(summary.files, FILES_SHOWN)}`)
+    print(`  files: ${formatCounts(summary.files, FILES_SHOWN)}`)
   }
   if (summary.models.length > 0) {
-    console.log(`  models: ${formatCounts(summary.models)}`)
+    print(`  models: ${formatCounts(summary.models)}`)
   }
-  for (const hint of hints(summary)) console.log(`  ! ${hint}`)
+  for (const hint of hints(summary)) {
+    print(`  ! ${hint}`)
+  }
 }
 
 function isActive(setting) {
@@ -128,18 +136,20 @@ function isActive(setting) {
   return severity !== 0 && severity !== 'off'
 }
 
-function eslintRules() {
+function eslintRules(cwd) {
   const rules = new Set()
-  const files = ESLINT_SAMPLE_PATTERNS.map((pattern) => globSync(pattern)[0])
+  const eslint = join(cwd, 'node_modules', '.bin', 'eslint')
+  const files = ESLINT_SAMPLE_PATTERNS.map(
+    (pattern) => globSync(pattern, { cwd })[0]
+  )
   for (const file of files.filter(Boolean)) {
     const config = JSON.parse(
-      execFileSync(join('node_modules', '.bin', 'eslint'), [
-        '--print-config',
-        file
-      ])
+      execFileSync(eslint, ['--print-config', file], { cwd })
     )
     for (const [rule, setting] of Object.entries(config.rules)) {
-      if (isActive(setting)) rules.add(rule)
+      if (isActive(setting)) {
+        rules.add(rule)
+      }
     }
   }
   return rules
@@ -149,57 +159,78 @@ function groupByPlugin(rules) {
   const groups = new Map()
   for (const rule of rules) {
     let plugin = rule.includes('/') ? rule.split('/')[0] : 'eslint'
-    if (HARNESS_RULES.includes(rule)) plugin = 'harness'
+    if (HARNESS_RULES.has(rule)) {
+      plugin = 'harness'
+    }
     groups.set(plugin, [...(groups.get(plugin) ?? []), rule])
   }
   return groups
 }
 
-function printNeverFired(firedRules, verbose) {
-  const configured = [...eslintRules(), ...HARNESS_RULES]
-  const neverFired = configured.filter((rule) => !firedRules.has(rule)).sort()
-  console.log(
+function printNeverFired(firedRules, verbose, cwd, print) {
+  const configured = [...eslintRules(cwd), ...HARNESS_RULES]
+  const neverFired = configured
+    .filter((rule) => !firedRules.has(rule))
+    .sort((a, b) => a.localeCompare(b))
+  print(
     `\nNever fired: ${neverFired.length} of ${configured.length} ESLint and harness rules`
   )
   for (const [plugin, rules] of groupByPlugin(neverFired)) {
-    console.log(
+    print(
       verbose
         ? `  ${plugin}: ${rules.join(', ')}`
         : `  ${plugin}: ${rules.length}`
     )
   }
-  if (!verbose) console.log('  Run with --verbose to list them')
-  console.log(
+  if (!verbose) {
+    print('  Run with --verbose to list them')
+  }
+  print(
     '  ShellCheck and SonarCloud rules are not listed. SonarCloud keeps its own history per rule'
   )
 }
 
-function main() {
+/**
+ * Prints the report.
+ * @param {string[]} args - command line arguments: --since <days>d and --verbose
+ * @param {{ cwd?: string, print?: (line: string) => void }} [options]
+ */
+export function harnessReport(
+  args,
+  { cwd = process.cwd(), print = console.log } = {}
+) {
   const { values } = parseArgs({
+    args,
     options: {
       since: { type: 'string', default: '30d' },
       verbose: { type: 'boolean', default: false }
     }
   })
   const days = parseSince(values.since)
-  const path = eventLogPath()
+  const path = eventLogPath(cwd)
   const events = readEvents(path, Date.now() - days * DAY_MS)
 
-  console.log(`Harness events in the last ${days} days, from ${path}`)
+  print(`Harness events in the last ${plural(days, 'day')}, from ${path}`)
   const byRule = Map.groupBy(events, (event) => event.rule)
   const summaries = [...byRule]
     .map(([rule, ruleEvents]) => summarise(rule, ruleEvents))
     .sort((a, b) => b.fired - a.fired)
-  if (summaries.length === 0) console.log('\nNo rules fired.')
-  summaries.forEach(printSummary)
+  if (summaries.length === 0) {
+    print('\nNo rules fired.')
+  }
+  for (const summary of summaries) {
+    printSummary(summary, print)
+  }
 
-  printNeverFired(new Set(byRule.keys()), values.verbose)
-  console.log(`\n${READINGS}`)
+  printNeverFired(new Set(byRule.keys()), values.verbose, cwd, print)
+  print(`\n${READINGS}`)
 }
 
-try {
-  main()
-} catch (error) {
-  console.error(error.message)
-  process.exitCode = 1
+if (import.meta.main) {
+  try {
+    harnessReport(process.argv.slice(2))
+  } catch (error) {
+    console.error(error.message)
+    process.exitCode = 1
+  }
 }

@@ -43,7 +43,8 @@
   },
   "imports": {
     "#/*": "./src/*",
-    "#test/*": "./test/*"
+    "#test/*": "./test/*",
+    "#scripts/*": "./scripts/*"
   },
   "author": "Defra DDTS",
   "license": "OGL-UK-3.0",

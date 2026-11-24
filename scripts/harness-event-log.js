@@ -9,12 +9,17 @@ const LOG_PATH = 'claude-harness/events.jsonl'
 function gitDir(directory) {
   const dotGit = join(directory, '.git')
   if (existsSync(dotGit)) {
-    if (statSync(dotGit).isDirectory()) return dotGit
+    if (statSync(dotGit).isDirectory()) {
+      return dotGit
+    }
     const pointer = /^gitdir: (.+)$/m.exec(readFileSync(dotGit, 'utf8'))
     return pointer ? resolve(directory, pointer[1]) : dotGit
   }
   const parent = dirname(directory)
-  return parent === directory ? undefined : gitDir(parent)
+  if (parent === directory) {
+    throw new Error('Not inside a git repository')
+  }
+  return gitDir(parent)
 }
 
 export function eventLogPath(directory = process.cwd()) {

@@ -55,15 +55,6 @@ function parseJson(text) {
   }
 }
 
-function readPayload() {
-  if (process.stdin.isTTY) return {}
-  return parseJson(readText(0)) ?? {}
-}
-
-function toRepoPath(file) {
-  return isAbsolute(file) ? relative(process.cwd(), file) : file
-}
-
 function truncate(text) {
   return text.length > DETAIL_MAX_LENGTH
     ? `${text.slice(0, DETAIL_MAX_LENGTH)}…`
@@ -137,18 +128,24 @@ function collectFindings(values, payload) {
   for (const rule of values.rule) {
     findings.push(...values.file.map((file) => ({ rule, file })), { rule })
   }
-  if (values['rule-from-reason']) findings.push(reasonFinding(payload.reason))
+  if (values['rule-from-reason']) {
+    findings.push(reasonFinding(payload.reason))
+  }
 
   // Every event names a rule, even when a report could not be read
   return findings.length > 0 ? findings : [{ rule: values.check }]
 }
 
-function groupByRule(findings) {
+function groupByRule(findings, cwd) {
   const rules = new Map()
   for (const { rule, file, detail } of findings) {
     const entry = rules.get(rule) ?? { files: new Set(), details: new Set() }
-    if (file) entry.files.add(toRepoPath(file))
-    if (detail) entry.details.add(detail)
+    if (file) {
+      entry.files.add(isAbsolute(file) ? relative(cwd, file) : file)
+    }
+    if (detail) {
+      entry.details.add(detail)
+    }
     rules.set(rule, entry)
   }
   return rules
@@ -191,7 +188,7 @@ function findModel(payload, session) {
   }
 }
 
-function buildEvents(values, payload) {
+function buildEvents(values, payload, cwd) {
   const session = payload.session_id ?? process.env.CLAUDE_CODE_SESSION_ID
   const common = {
     ts: new Date().toISOString(),
@@ -203,7 +200,7 @@ function buildEvents(values, payload) {
     model: findModel(payload, session),
     tool: payload.tool_name
   }
-  return [...groupByRule(collectFindings(values, payload))].map(
+  return [...groupByRule(collectFindings(values, payload), cwd)].map(
     ([rule, { files, details }]) => ({
       ...common,
       rule,
@@ -213,20 +210,33 @@ function buildEvents(values, payload) {
   )
 }
 
-function main() {
-  if (process.env.CI || process.env.HARNESS_LOG === '0') return
-  const { values } = parseArgs({ options, strict: false })
-  const payload = readPayload()
-  const lines = buildEvents(values, payload).map((event) =>
-    JSON.stringify(event)
-  )
-  const path = eventLogPath()
+/**
+ * Appends one event per rule to the event log.
+ * @param {string[]} args - command line arguments, see the options above
+ * @param {string} input - the Claude Code hook payload, or an empty string
+ * @param {string} [cwd] - the repo directory
+ */
+export function logHarnessEvent(args, input, cwd = process.cwd()) {
+  if (process.env.CI || process.env.HARNESS_LOG === '0') {
+    return
+  }
+  const { values } = parseArgs({ args, options, strict: false })
+  const events = buildEvents(values, parseJson(input) ?? {}, cwd)
+  const path = eventLogPath(cwd)
   mkdirSync(dirname(path), { recursive: true })
-  appendFileSync(path, lines.map((line) => `${line}\n`).join(''))
+  appendFileSync(
+    path,
+    events.map((event) => `${JSON.stringify(event)}\n`).join('')
+  )
 }
 
-try {
-  main()
-} catch {
-  // A failed log write must never change what the hook does
+if (import.meta.main) {
+  try {
+    logHarnessEvent(
+      process.argv.slice(2),
+      process.stdin.isTTY ? '' : readText(0)
+    )
+  } catch {
+    // A failed log write must never change what the hook does
+  }
 }
