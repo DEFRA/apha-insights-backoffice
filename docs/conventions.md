@@ -11,6 +11,7 @@ Coding conventions that apply across the repo. Rules marked _(enforced)_ are che
   - `.claude/settings.json`, `.claude/hooks/`, `.husky/pre-commit`, `.husky/commit-msg`, `scripts/`, `.github/workflows/`
   - the `scripts` section of `package.json`, and git's `core.hooksPath`
 - Each time one of these rules fires, it is recorded in a local event log. To propose a new rule, open a GitHub issue. See [harness.md](harness.md)
+- When a change adds, changes or removes a rule, update the [rules table](harness.md#rules) in the same pull request
 
 ## Modules
 

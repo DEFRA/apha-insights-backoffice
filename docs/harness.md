@@ -1,6 +1,28 @@
 # Harness feedback loop
 
-The repo has many automated rules: ESLint, ShellCheck, a suppression check, git hooks, Claude Code hooks and SonarCloud. This page explains how we record which rules fire, how to read that record, and how agents propose new rules.
+The repo has many automated rules: ESLint, ShellCheck, a suppression check, git hooks, Claude Code hooks and SonarCloud. This page lists them, explains how we record which rules fire, how to read that record, and how agents propose new rules.
+
+## Rules
+
+Each rule runs in one or more places. In Claude Code, a failure goes back to Claude to fix straight away. In a git hook, it rejects the commit. In CI, it stops the pull request merging.
+
+| Rule                    | What it enforces                                                                                       | Claude Code      | Git hook   | CI  | Logged as                                        |
+| ----------------------- | ------------------------------------------------------------------------------------------------------ | ---------------- | ---------- | --- | ------------------------------------------------ |
+| JavaScript lint         | ESLint with neostandard and SonarCloud's rules. Inline directive comments are ignored                  | Edit, command    | pre-commit | Yes | ESLint rule ID, or `lint` from pre-commit        |
+| Code conventions        | In `src/`: settings only through `config.js`, named exports only, shared constants in `src/constants/` | Edit, command    | pre-commit | Yes | ESLint rule ID, or `lint` from pre-commit        |
+| Shell lint              | ShellCheck, with double brackets required                                                              | Edit, command    | pre-commit | Yes | ShellCheck `SC` code, or `lint` from pre-commit  |
+| SCSS lint               | Stylelint with the GDS config                                                                          | No               | pre-commit | Yes | `lint`                                           |
+| Formatting              | Prettier                                                                                               | No               | pre-commit | Yes | `format`                                         |
+| No suppression comments | No `eslint-disable`, `shellcheck disable`, `stylelint-disable` or `NOSONAR`                            | Edit, command    | pre-commit | Yes | `suppression-comment`, or `lint` from pre-commit |
+| Conventional Commits    | Commit messages and pull request titles                                                                | PR title         | commit-msg | No  | `conventional-commits`                           |
+| Protected config        | Claude Code cannot change the lint, hook or CI setup. Changes are reverted                             | Every tool call  | No         | No  | `protected-config`                               |
+| No bypassing hooks      | Claude Code cannot run `--no-verify`, `HUSKY=0` or change `core.hooksPath`                             | Refused          | No         | No  | Not logged                                       |
+| Tests                   | `npm test` passes                                                                                      | No               | No         | Yes | Not logged                                       |
+| SonarCloud quality gate | No new critical issues, reliability A, 90% coverage on new code                                        | After `git push` | No         | Yes | SonarCloud rule key, or `gate:<metric>`          |
+| Dependency audit        | No critical npm vulnerabilities                                                                        | No               | No         | Yes | Not logged                                       |
+| Auto mode refusal       | Claude Code's auto mode refused a tool call                                                            | Refused          | No         | No  | The refusal's category, or `auto-mode-denied`    |
+
+In the Claude Code column, "Edit" is `lint-edited-file.sh` after Claude edits a file, and "command" is `lint-shell-changes.sh` on the files a shell command changed. The hooks are set up in `.claude/settings.json`. The conventions behind these rules are in [conventions.md](conventions.md).
 
 ## Event log
 
@@ -39,7 +61,7 @@ There is one line per rule that fired:
 | `files`   | Files the rule fired on, where known                                                                       |
 | `detail`  | Extra context, such as the suppression comment that was found                                              |
 
-The harness rules are `suppression-comment`, `conventional-commits`, `protected-config`, and `format` and `lint` from the pre-commit hook.
+The harness rules are `suppression-comment`, `conventional-commits`, `protected-config`, and `format` and `lint` from the pre-commit hook. See [Rules](#rules) for where each one runs.
 
 `scripts/log-harness-event.js` writes the log, and every hook calls it. If writing fails, the hook carries on as normal. Nothing is logged in CI, or when `HARNESS_LOG=0` is set.
 
@@ -88,4 +110,4 @@ Every month or two, review three lists:
 2. Rules that never fire, from the report, to remove
 3. Rules agents dispute, to tune
 
-Record each accepted rule with the [create-adr skill](../.claude/skills/create-adr/SKILL.md).
+Add each accepted rule to the [rules table](#rules). Record a new kind of check, such as a new hook or CI gate, with the [create-adr skill](../.claude/skills/create-adr/SKILL.md).
