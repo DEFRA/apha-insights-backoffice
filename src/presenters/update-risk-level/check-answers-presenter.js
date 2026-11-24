@@ -1,14 +1,19 @@
 import { riskDirectionText, riskLevelText } from '#/constants/risk-levels.js'
 import {
+  CHANGE_PATH,
+  SELECT_DISEASES_HREF
+} from '#/constants/update-risk-level-paths.js'
+import {
   directionFieldName,
   userCommentFieldName
 } from '#/schemas/risk-level-change-schema.js'
 
 const PAGE_TITLE = 'Check your answers'
-const FORM_HREF = '/update-risk-level'
 
 const changeAction = (field, visuallyHiddenText) => ({
-  items: [{ href: `${FORM_HREF}#${field}`, text: 'Change', visuallyHiddenText }]
+  items: [
+    { href: `${CHANGE_PATH}#${field}`, text: 'Change', visuallyHiddenText }
+  ]
 })
 
 const diseaseCard = ({
@@ -32,7 +37,10 @@ const diseaseCard = ({
     {
       key: { text: 'New risk level' },
       value: { text: riskLevelText(newRiskLevel) },
-      actions: changeAction(directionFieldName(id), disease)
+      actions: changeAction(
+        directionFieldName(id),
+        `direction of change for ${disease}`
+      )
     },
     {
       key: { text: 'Comment' },
@@ -50,5 +58,18 @@ const diseaseCard = ({
 export const checkAnswersPresenter = ({ changes }) => ({
   pageTitle: PAGE_TITLE,
   heading: PAGE_TITLE,
+  selection: {
+    key: { text: 'Diseases to update' },
+    value: { text: changes.map(({ disease }) => disease).join(', ') },
+    actions: {
+      items: [
+        {
+          href: SELECT_DISEASES_HREF,
+          text: 'Change',
+          visuallyHiddenText: 'diseases to update'
+        }
+      ]
+    }
+  },
   diseases: changes.map(diseaseCard)
 })

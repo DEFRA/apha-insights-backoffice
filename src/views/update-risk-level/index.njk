@@ -3,6 +3,12 @@
 {% from "govuk/components/character-count/macro.njk" import govukCharacterCount %}
 {% from "govuk/components/button/macro.njk" import govukButton %}
 {% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+
+{% block beforeContent %}
+  {{ super() }}
+  {{ govukBackLink(backLink) }}
+{% endblock %}
 
 {% block content %}
   <div class="govuk-grid-row">
@@ -20,7 +26,7 @@
 
       <p class="govuk-body">{{ intro }}</p>
 
-      <form action="/update-risk-level" method="post" novalidate>
+      <form action="/update-risk-level/change" method="post" novalidate>
         <input type="hidden" name="crumb" value="{{ crumb }}">
 
         {% for disease in diseases %}

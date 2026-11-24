@@ -27,7 +27,8 @@ export async function createServer() {
         },
         xss: 'enabled',
         noSniff: true,
-        xframe: true
+        xframe: true,
+        referrer: 'strict-origin-when-cross-origin'
       }
     },
     router: {

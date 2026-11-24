@@ -9,6 +9,10 @@
         text: heading
       }) }}
 
+      {{ govukSummaryList({
+        rows: [selection]
+      }) }}
+
       {% for disease in diseases %}
         {{ govukSummaryList({
           card: {

@@ -1,6 +1,8 @@
+import { UPDATE_RISK_LEVEL_PATH } from '#/constants/update-risk-level-paths.js'
+
 const NAVIGATION_ITEMS = [
   { text: 'Home', href: '/' },
-  { text: 'Update risk level', href: '/update-risk-level' }
+  { text: 'Update risk level', href: UPDATE_RISK_LEVEL_PATH }
 ]
 
 /**

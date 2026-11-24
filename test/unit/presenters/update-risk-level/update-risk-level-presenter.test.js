@@ -18,6 +18,24 @@ describe('#updateRiskLevelPresenter', () => {
     expect(result.diseases).toHaveLength(3)
   })
 
+  test('Should provide a back link to the select diseases page', () => {
+    const result = updateRiskLevelPresenter({ diseases: currentRiskLevels() })
+
+    expect(result.backLink).toEqual({
+      href: '/update-risk-level',
+      text: 'Back'
+    })
+  })
+
+  test('Should provide fields only for the diseases it is given', () => {
+    const [asf] = currentRiskLevels()
+    const result = updateRiskLevelPresenter({ diseases: [asf] })
+
+    expect(result.diseases.map(({ name }) => name)).toEqual([
+      'African swine fever'
+    ])
+  })
+
   test('Should provide a comment box with a character count for each disease', () => {
     const result = updateRiskLevelPresenter({ diseases: currentRiskLevels() })
 
