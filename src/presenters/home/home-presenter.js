@@ -1,6 +1,7 @@
 import { format, isValid, parseISO } from 'date-fns'
 import { config } from '#/config/config.js'
 import { riskDirectionText, riskLevelText } from '#/constants/risk-levels.js'
+import { UPDATE_RISK_LEVEL_PATH } from '#/constants/update-risk-level-paths.js'
 
 const NO_VALUE = '–'
 
@@ -65,7 +66,7 @@ export const homePresenter = ({ diseases, latest }) => {
     pageTitle: 'Home',
     heading: config.get('serviceDisplayName'),
     intro: 'Record risk level changes and view the latest data.',
-    links: [{ text: 'Update risk level', href: '/update-risk-level' }],
+    links: [{ text: 'Update risk level', href: UPDATE_RISK_LEVEL_PATH }],
     riskLevelChanges: {
       heading: 'Risk level changes',
       tabs: diseases.map((disease) =>
