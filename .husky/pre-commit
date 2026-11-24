@@ -1,2 +1,9 @@
 # shellcheck shell=sh
-npm run git:pre-commit-hook
+# Checks formatting, then lint. A failure is recorded in the harness event log, see docs/harness.md
+
+log_failure() {
+  node scripts/log-harness-event.js --layer git-hook --check pre-commit --outcome rejected --rule "$1" </dev/null 2>/dev/null
+}
+
+npm run format:check || { log_failure format; exit 1; }
+npm run lint || { log_failure lint; exit 1; }

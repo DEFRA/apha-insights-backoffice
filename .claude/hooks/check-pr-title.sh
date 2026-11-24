@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 # Blocks `gh pr create` and `gh pr edit` when --title is not a Conventional Commits message.
 # PRs are squash-merged, so the title becomes the commit on main. Exit code 2 sends the reason back to Claude.
+# A block is recorded in the harness event log, see docs/harness.md.
 
-title=$(node "$(dirname "$0")/extract-pr-title.js")
+input=$(cat)
+title=$(printf '%s' "$input" | node "$(dirname "$0")/extract-pr-title.js")
 
 [[ -n "$title" ]] || exit 0
 
@@ -10,8 +12,10 @@ cd "${CLAUDE_PROJECT_DIR:-.}" || exit 0
 message_file=$(mktemp)
 printf '%s\n' "$title" > "$message_file"
 
-if ! output=$(sh .husky/commit-msg "$message_file" 2>&1); then
+# HARNESS_LOG=0 stops the commit-msg hook logging this as a rejected commit
+if ! output=$(HARNESS_LOG=0 sh .husky/commit-msg "$message_file" 2>&1); then
   rm -f "$message_file"
+  node scripts/log-harness-event.js --layer claude-hook --check check-pr-title --outcome blocked --rule conventional-commits <<< "$input" 2>/dev/null
   echo "PR titles become the squash commit on main, so they must follow Conventional Commits." >&2
   echo "$output" >&2
   exit 2

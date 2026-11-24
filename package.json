@@ -24,7 +24,6 @@
     "docker:test:watch": "npm run docker:test:down && docker compose -f compose.yaml -f compose.test.yaml -f compose.test.watch.yaml -p apha-insights-backoffice-test run --build --rm apha-insights-backoffice; status=$?; npm run docker:test:down; exit $status",
     "format": "prettier --write \"src/**/*.js\" \"**/*.{js,cjs,md,json,config.js,test.js}\"",
     "format:check": "prettier --check \"src/**/*.js\" \"**/*.{js,cjs,md,json,config.js,test.js}\"",
-    "git:pre-commit-hook": "npm run format:check && npm run lint",
     "lint": "run-s lint:js lint:scss lint:sh lint:suppressions",
     "lint:js": "eslint .",
     "lint:js:fix": "eslint . --fix",
@@ -39,11 +38,13 @@
     "prestart": "npm run build:frontend",
     "start": "NODE_ENV=production node .",
     "setup:husky": "node -e \"try { (await import('husky')).default() } catch (e) { if (e.code !== 'ERR_MODULE_NOT_FOUND') throw e }\" --input-type module",
-    "prepare": "npm run setup:husky"
+    "prepare": "npm run setup:husky",
+    "harness:report": "node scripts/harness-report.js"
   },
   "imports": {
     "#/*": "./src/*",
-    "#test/*": "./test/*"
+    "#test/*": "./test/*",
+    "#scripts/*": "./scripts/*"
   },
   "author": "Defra DDTS",
   "license": "OGL-UK-3.0",
