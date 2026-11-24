@@ -27,9 +27,9 @@ describe('#checkAnswersPresenter', () => {
 
     expect(newLevel.actions.items).toEqual([
       {
-        href: '/update-risk-level#direction-asf',
+        href: '/update-risk-level/change#direction-asf',
         text: 'Change',
-        visuallyHiddenText: 'African swine fever'
+        visuallyHiddenText: 'direction of change for African swine fever'
       }
     ])
   })
@@ -40,11 +40,41 @@ describe('#checkAnswersPresenter', () => {
 
     expect(comment.actions.items).toEqual([
       {
-        href: '/update-risk-level#userComment-hpai',
+        href: '/update-risk-level/change#userComment-hpai',
         text: 'Change',
         visuallyHiddenText: 'comment for Highly pathogenic avian influenza'
       }
     ])
+  })
+
+  test('Should provide a row listing the selected diseases that links to the select page', () => {
+    const { selection } = checkAnswersPresenter(validRiskLevelChange())
+
+    expect(selection).toEqual({
+      key: { text: 'Diseases to update' },
+      value: {
+        text: 'African swine fever, Highly pathogenic avian influenza, Bluetongue'
+      },
+      actions: {
+        items: [
+          {
+            href: '/update-risk-level',
+            text: 'Change',
+            visuallyHiddenText: 'diseases to update'
+          }
+        ]
+      }
+    })
+  })
+
+  test('Should provide a card only for the diseases in the change', () => {
+    const [asf] = validRiskLevelChange().changes
+    const result = checkAnswersPresenter({ changes: [asf] })
+
+    expect(result.diseases.map(({ title }) => title)).toEqual([
+      'African swine fever'
+    ])
+    expect(result.selection.value.text).toBe('African swine fever')
   })
 
   test('Should not provide a separate comment list', () => {

@@ -1,3 +1,5 @@
+import { SELECT_DISEASES_HREF } from '#/constants/update-risk-level-paths.js'
+
 const PAGE_TITLE = 'Submission received'
 
 /**
@@ -9,6 +11,6 @@ export const updateRiskLevelConfirmationPresenter = () => ({
   heading: PAGE_TITLE,
   links: [
     { text: 'Home', href: '/' },
-    { text: 'Add another', href: '/update-risk-level' }
+    { text: 'Add another', href: SELECT_DISEASES_HREF }
   ]
 })

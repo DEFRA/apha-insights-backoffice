@@ -3,6 +3,7 @@ import {
   riskDirections,
   riskLevelText
 } from '#/constants/risk-levels.js'
+import { SELECT_DISEASES_HREF } from '#/constants/update-risk-level-paths.js'
 import {
   directionFieldName,
   userCommentFieldName
@@ -48,7 +49,7 @@ const diseaseFields = ({ id, name, currentRiskLevel }, values, errors) => {
 }
 
 /**
- * Formats data ready for presenting in the `/update-risk-level` page
+ * Formats data ready for presenting in the `/update-risk-level/change` page
  * @module updateRiskLevelPresenter
  * @param {object} form
  * @param {{id: string, name: string, currentRiskLevel: string}[]} form.diseases - the diseases to change
@@ -69,6 +70,7 @@ export const updateRiskLevelPresenter = ({
   return {
     pageTitle: hasErrors ? `Error: ${PAGE_TITLE}` : PAGE_TITLE,
     heading: PAGE_TITLE,
+    backLink: { href: SELECT_DISEASES_HREF, text: 'Back' },
     intro:
       'For each disease, select whether its risk level should increase, decrease or stay the same, and add a comment.',
     diseases: diseases.map((disease) => diseaseFields(disease, values, errors)),
