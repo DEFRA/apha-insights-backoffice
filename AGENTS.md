@@ -2,7 +2,7 @@
 
 Back office frontend for APHA's International Disease Monitoring team, used to record risk level changes. Hapi, Nunjucks and GOV.UK Frontend on the CDP Node frontend template.
 
-It is a skeleton: `src/services/risk-level-service.js` is a stub until the backend API exists. Do not add a real data store.
+`src/services/risk-level-service.js` reads risk data from apha-risk-insights-backend when `BACKEND_API_ENABLED` is true, and returns placeholder data otherwise. Writes are still stubbed until the backend has an endpoint for them. Do not add a real data store.
 
 ## Before you finish
 
