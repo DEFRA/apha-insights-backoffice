@@ -53,6 +53,25 @@ class NetworkError extends Error {
 }
 
 /**
+ * Error thrown when a 2xx response says it is JSON but its body cannot be parsed.
+ * The parser's own message quotes the body, so it is not kept as the cause.
+ */
+class InvalidResponseError extends Error {
+  /**
+   * @param {string} method
+   * @param {string} url
+   * @param {number} status
+   */
+  constructor(method, url, status) {
+    super(
+      `${method} ${url} responded with status ${status} and a body that is not valid JSON`
+    )
+    this.name = 'InvalidResponseError'
+    this.status = status
+  }
+}
+
+/**
  * @param {Response} response
  * @returns {string}
  */
@@ -68,9 +87,12 @@ const isJson = (mediaType) =>
 
 /**
  * @param {Response} response
+ * @param {string} method
+ * @param {string} url
  * @returns {Promise<unknown>}
+ * @throws {InvalidResponseError} When a JSON body cannot be parsed
  */
-const parseSuccessBody = async (response) => {
+const parseSuccessBody = async (response, method, url) => {
   if (response.status === NO_CONTENT_STATUS) {
     return null
   }
@@ -78,7 +100,14 @@ const parseSuccessBody = async (response) => {
   if (text === '') {
     return null
   }
-  return isJson(getMediaType(response)) ? JSON.parse(text) : text
+  if (!isJson(getMediaType(response))) {
+    return text
+  }
+  try {
+    return JSON.parse(text)
+  } catch {
+    throw new InvalidResponseError(method, url, response.status)
+  }
 }
 
 /**
@@ -137,17 +166,22 @@ const buildHttpError = async (response, method, url) => {
 
 /**
  * Make an outbound HTTP request using the global fetch.
- * No timeouts or retries are applied.
+ * No retries are applied, and no timeout unless one is given.
  * @param {string} url - Request URL
  * @param {object} [options]
  * @param {string} [options.method] - HTTP method, defaults to GET
  * @param {Record<string, string>} [options.headers] - Request headers
  * @param {object | string} [options.body] - Objects are sent as JSON, strings as-is
+ * @param {number} [options.timeout] - Milliseconds to wait before giving up
  * @returns {Promise<unknown>} Parsed JSON, text, or null when there is no content
  * @throws {HttpError} When a non-2xx response is received
- * @throws {NetworkError} When the request fails before a response is received
+ * @throws {NetworkError} When the request fails or times out before a response is received
+ * @throws {InvalidResponseError} When a 2xx JSON response body cannot be parsed
  */
-const httpRequest = async (url, { method = 'GET', headers, body } = {}) => {
+const httpRequest = async (
+  url,
+  { method = 'GET', headers, body, timeout } = {}
+) => {
   const prepared = prepareBody(headers, body)
   const startedAt = performance.now()
   const elapsed = () => performance.now() - startedAt
@@ -159,7 +193,8 @@ const httpRequest = async (url, { method = 'GET', headers, body } = {}) => {
     response = await fetch(url, {
       method,
       headers: prepared.headers,
-      body: prepared.body
+      body: prepared.body,
+      signal: timeout === undefined ? undefined : AbortSignal.timeout(timeout)
     })
   } catch (cause) {
     const error = new NetworkError(method, url, cause)
@@ -175,11 +210,20 @@ const httpRequest = async (url, { method = 'GET', headers, body } = {}) => {
     throw error
   }
 
-  const data = await parseSuccessBody(response)
+  let data
+  try {
+    data = await parseSuccessBody(response, method, url)
+  } catch (error) {
+    logger.error(
+      buildHttpClientErrorLog(method, url, error, elapsed(), response.status)
+    )
+    throw error
+  }
+
   logger.info(
     buildHttpClientSuccessLog(method, url, response.status, elapsed())
   )
   return data
 }
 
-export { HttpError, NetworkError, httpRequest }
+export { HttpError, InvalidResponseError, NetworkError, httpRequest }
