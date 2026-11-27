@@ -84,7 +84,7 @@
     "@vitest/coverage-v8": "5.1.1",
     "cheerio": "1.2.0",
     "chokidar": "3.6.0",
-    "eslint": "10.14.0",
+    "eslint": "10.15.0",
     "eslint-plugin-sonarjs": "4.2.2",
     "husky": "9.1.7",
     "jsdom": "31.0.1",
