@@ -77,7 +77,7 @@ The harness rules are `suppression-comment`, `conventional-commits`, `protected-
 npm run harness:report -- --since 30d
 ```
 
-This lists each rule that fired, with how many times, in how many Claude Code sessions and by how many people, plus the files and models involved. It also lists ESLint and harness rules that never fired in the period. Add `--verbose` to name them. Events older than 90 days are ignored. Delete the log file whenever you like.
+This prints a table of each rule that fired, with how many times, the models involved and the check that caught it. Add `--detail` for how many Claude Code sessions and people tripped each rule, the files involved, and the names of the ESLint and harness rules that never fired in the period. Events older than 90 days are ignored. Delete the log file whenever you like.
 
 Read the report with these patterns:
 

@@ -1,6 +1,7 @@
-// Summarises the harness event log: how often each rule fired, in which files and how many
-// sessions, and which configured rules never fired. Events older than 90 days are ignored.
-// Usage: npm run harness:report -- [--since 30d] [--verbose]
+// Summarises the harness event log as a table of rules that fired. --detail adds the files and
+// sessions for each rule, and names the configured rules that never fired. Events older than
+// 90 days are ignored.
+// Usage: npm run harness:report -- [--since 30d] [--detail]
 // See docs/harness.md for how to read the report.
 
 import { execFileSync } from 'node:child_process'
@@ -131,6 +132,33 @@ function printSummary(summary, print) {
   }
 }
 
+function printTable(summaries, print) {
+  const header = ['Rule', 'Fired', 'Model', 'Checked by']
+  const rows = summaries.map((summary) => [
+    summary.rule,
+    String(summary.fired),
+    summary.models.map(([model]) => model).join(', ') || '-',
+    summary.checks.join(', ')
+  ])
+  const widths = header.map((title, column) =>
+    Math.max(title.length, ...rows.map((row) => row[column].length))
+  )
+  const formatRow = (row) =>
+    row
+      .map((cell, column) =>
+        column === 1
+          ? cell.padStart(widths[column])
+          : cell.padEnd(widths[column])
+      )
+      .join('  ')
+      .trimEnd()
+  print(formatRow(header))
+  print(formatRow(widths.map((width) => '-'.repeat(width))))
+  for (const row of rows) {
+    print(formatRow(row))
+  }
+}
+
 function isActive(setting) {
   const severity = Array.isArray(setting) ? setting[0] : setting
   return severity !== 0 && severity !== 'off'
@@ -167,7 +195,7 @@ function groupByPlugin(rules) {
   return groups
 }
 
-function printNeverFired(firedRules, verbose, cwd, print) {
+function printNeverFired(firedRules, cwd, print) {
   const configured = [...eslintRules(cwd), ...HARNESS_RULES]
   const neverFired = configured
     .filter((rule) => !firedRules.has(rule))
@@ -176,14 +204,7 @@ function printNeverFired(firedRules, verbose, cwd, print) {
     `\nNever fired: ${neverFired.length} of ${configured.length} ESLint and harness rules`
   )
   for (const [plugin, rules] of groupByPlugin(neverFired)) {
-    print(
-      verbose
-        ? `  ${plugin}: ${rules.join(', ')}`
-        : `  ${plugin}: ${rules.length}`
-    )
-  }
-  if (!verbose) {
-    print('  Run with --verbose to list them')
+    print(`  ${plugin} (${rules.length}): ${rules.join(', ')}`)
   }
   print(
     '  ShellCheck and SonarCloud rules are not listed. SonarCloud keeps its own history per rule'
@@ -192,7 +213,7 @@ function printNeverFired(firedRules, verbose, cwd, print) {
 
 /**
  * Prints the report.
- * @param {string[]} args - command line arguments: --since <days>d and --verbose
+ * @param {string[]} args - command line arguments: --since <days>d and --detail
  * @param {{ cwd?: string, print?: (line: string) => void }} [options]
  */
 export function harnessReport(
@@ -203,7 +224,7 @@ export function harnessReport(
     args,
     options: {
       since: { type: 'string', default: '30d' },
-      verbose: { type: 'boolean', default: false }
+      detail: { type: 'boolean', default: false }
     }
   })
   const days = parseSince(values.since)
@@ -218,11 +239,20 @@ export function harnessReport(
   if (summaries.length === 0) {
     print('\nNo rules fired.')
   }
+
+  if (!values.detail) {
+    if (summaries.length > 0) {
+      print('')
+      printTable(summaries, print)
+    }
+    print('\nFor full details run with --detail')
+    return
+  }
+
   for (const summary of summaries) {
     printSummary(summary, print)
   }
-
-  printNeverFired(new Set(byRule.keys()), values.verbose, cwd, print)
+  printNeverFired(new Set(byRule.keys()), cwd, print)
   print(`\n${READINGS}`)
 }
 
