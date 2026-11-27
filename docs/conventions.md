@@ -37,6 +37,7 @@ Coding conventions that apply across the repo. Rules marked _(enforced)_ are che
 
 ## Git
 
+- Make changes in a git worktree of your own, not the main checkout, when another session may be working in the repo. Sessions in one checkout share a working tree, so one session's protected-config check can revert or remove another's changes. Run `npm install` in a new worktree before running anything
 - Branch as `<type>/<description>`, for example `feat/risk-level-history`
 - Conventional commit messages, `<type>(<optional scope>): <description>`, with type one of `build`, `chore`, `ci`, `docs`, `feat`, `fix`, `perf`, `refactor`, `revert`, `style` or `test` _(enforced)_
 - Pull request titles use the same format, because pull requests are squash-merged and the title becomes the commit on `main`. Claude Code blocks `gh pr create` and `gh pr edit` with a non-conforming `--title`

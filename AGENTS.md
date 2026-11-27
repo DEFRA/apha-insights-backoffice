@@ -4,6 +4,10 @@ Back office frontend for APHA's International Disease Monitoring team, used to r
 
 `src/services/risk-level-service.js` reads risk data from apha-risk-insights-backend when `BACKEND_API_ENABLED` is true, and returns placeholder data otherwise. Writes are still stubbed until the backend has an endpoint for them. Do not add a real data store.
 
+## Before you start
+
+Work in a git worktree of your own, not the main checkout, when another session may be working in the repo. See [docs/conventions.md](docs/conventions.md#git).
+
 ## Before you finish
 
 Run these and fix any failures. CI runs lint and format checks on every pull request, and a pull request cannot merge until they pass.
@@ -28,12 +32,12 @@ Not after every session, and not for problems that have not happened.
 
 ## Contents
 
-| When you need to                           | Read                                                     |
-| ------------------------------------------ | -------------------------------------------------------- |
-| Know where code or a constant goes         | [docs/code-layout.md](docs/code-layout.md)               |
-| Follow module, config, UI and git rules    | [docs/conventions.md](docs/conventions.md)               |
-| Add or change logging                      | [ecs-logging skill](.claude/skills/ecs-logging/SKILL.md) |
-| Make a hard-to-reverse decision            | [create-adr skill](.claude/skills/create-adr/SKILL.md)   |
-| See which rules fire, or propose a rule    | [docs/harness.md](docs/harness.md)                       |
-| Understand why things are the way they are | [adr/](adr/)                                             |
-| Run the app locally or in Docker           | [README.md](README.md)                                   |
+| When you need to                                  | Read                                                     |
+| ------------------------------------------------- | -------------------------------------------------------- |
+| Know where code or a constant goes                | [docs/code-layout.md](docs/code-layout.md)               |
+| Follow module, config, UI, git and worktree rules | [docs/conventions.md](docs/conventions.md)               |
+| Add or change logging                             | [ecs-logging skill](.claude/skills/ecs-logging/SKILL.md) |
+| Make a hard-to-reverse decision                   | [create-adr skill](.claude/skills/create-adr/SKILL.md)   |
+| See which rules fire, or propose a rule           | [docs/harness.md](docs/harness.md)                       |
+| Understand why things are the way they are        | [adr/](adr/)                                             |
+| Run the app locally or in Docker                  | [README.md](README.md)                                   |
