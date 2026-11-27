@@ -3,9 +3,14 @@ import { subDays } from 'date-fns'
 // Marks every placeholder assessment, so it is never mistaken for backend data
 const PLACEHOLDER_SOURCE = 'Placeholder data'
 
-// How many days before the request each placeholder assessment was reported, newest first.
-// All fall inside a window of 3 months or more.
-const DAYS_AGO = [3, 20, 75]
+// How many days before the request each placeholder assessment was reported.
+// All fall inside a window of 3 months or more, and the newest two inside 1 month.
+const NEWEST_DAYS_AGO = 3
+const PREVIOUS_DAYS_AGO = 20
+const OLDEST_DAYS_AGO = 75
+
+// Newest first, matching the order of each disease's assessments
+const DAYS_AGO = [NEWEST_DAYS_AGO, PREVIOUS_DAYS_AGO, OLDEST_DAYS_AGO]
 
 // Each disease's assessments, newest first: [status, previousStatus, levelChange]
 const PLACEHOLDER_DISEASES = [
