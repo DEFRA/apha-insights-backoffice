@@ -39,6 +39,10 @@
     }), tabItems) %}
   {% endfor %}
 
-  {{ govukTabs({ items: tabItems }) }}
+  {% if riskLevelChanges.emptyMessage %}
+    <p class="govuk-body" data-testid="no-risk-levels">{{ riskLevelChanges.emptyMessage }}</p>
+  {% else %}
+    {{ govukTabs({ items: tabItems }) }}
+  {% endif %}
 
 {% endblock %}

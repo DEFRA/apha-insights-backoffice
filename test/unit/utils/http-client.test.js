@@ -1,6 +1,11 @@
 import { vi } from 'vitest'
 
-import { httpRequest, HttpError, NetworkError } from '#/utils/http-client.js'
+import {
+  httpRequest,
+  HttpError,
+  InvalidResponseError,
+  NetworkError
+} from '#/utils/http-client.js'
 
 const mockLogger = vi.hoisted(() => ({
   info: vi.fn(),
@@ -134,7 +139,22 @@ describe('#httpRequest', () => {
       )
     })
 
-    test('Should not configure timeouts or abort signals', async () => {
+    test('Should abort the request after the supplied timeout', async () => {
+      fetchMock.mockResolvedValue(jsonResponse({}))
+      const signal = AbortSignal.abort()
+      const timeoutSpy = vi
+        .spyOn(AbortSignal, 'timeout')
+        .mockReturnValue(signal)
+
+      await httpRequest(url, { timeout: 2500 })
+
+      const [, init] = fetchMock.mock.calls[0]
+      expect(timeoutSpy).toHaveBeenCalledWith(2500)
+      expect(init.signal).toBe(signal)
+      timeoutSpy.mockRestore()
+    })
+
+    test('Should not configure timeouts or abort signals by default', async () => {
       fetchMock.mockResolvedValue(jsonResponse({}))
 
       await httpRequest(url)
@@ -217,6 +237,54 @@ describe('#httpRequest', () => {
       await expect(httpRequest(url, { method: 'POST' })).resolves.toEqual({
         created: true
       })
+    })
+  })
+
+  describe('malformed JSON responses', () => {
+    const malformed = () =>
+      makeResponse({
+        contentType: 'application/json',
+        body: '{"note": "response-body-marker"'
+      })
+
+    test('Should throw an InvalidResponseError naming the method, url and status', async () => {
+      fetchMock.mockResolvedValue(malformed())
+
+      const error = await httpRequest(url).catch((e) => e)
+
+      expect(error).toBeInstanceOf(InvalidResponseError)
+      expect(error.status).toBe(200)
+      expect(error.message).toBe(
+        `GET ${url} responded with status 200 and a body that is not valid JSON`
+      )
+    })
+
+    test('Should keep the response body out of the error and its stack', async () => {
+      fetchMock.mockResolvedValue(malformed())
+
+      const error = await httpRequest(url).catch((e) => e)
+
+      expect(error.cause).toBeUndefined()
+      expect(error.stack).not.toContain('response-body-marker')
+    })
+
+    test('Should log the failure without the response body', async () => {
+      fetchMock.mockResolvedValue(malformed())
+
+      await httpRequest(url).catch(() => {})
+
+      expect(mockLogger.error).toHaveBeenCalledTimes(1)
+      const [logged] = mockLogger.error.mock.calls[0]
+      expect(logged.event).toMatchObject({ outcome: 'failure', kind: 200 })
+      expect(logged.error.type).toBe('InvalidResponseError')
+      expect(JSON.stringify(mockLogger.error.mock.calls)).not.toContain(
+        'response-body-marker'
+      )
+      expect(mockLogger.info).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({ outcome: 'success' })
+        })
+      )
     })
   })
 
@@ -382,6 +450,19 @@ describe('#httpRequest', () => {
 
       expect(error.message).toContain('POST')
       expect(error.message).toContain(url)
+    })
+
+    test('Should throw a NetworkError when the request times out', async () => {
+      const timedOut = new DOMException(
+        'The operation timed out',
+        'TimeoutError'
+      )
+      fetchMock.mockRejectedValue(timedOut)
+
+      const error = await httpRequest(url, { timeout: 1 }).catch((e) => e)
+
+      expect(error).toBeInstanceOf(NetworkError)
+      expect(error.cause).toBe(timedOut)
     })
 
     test('Should not retry after a network failure', async () => {

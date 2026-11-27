@@ -23,6 +23,13 @@ services:
       USE_SINGLE_INSTANCE_CACHE: true
       LOG_FORMAT: pino-pretty
       SESSION_COOKIE_SECURE: false
+      # Start with BACKEND_API_ENABLED=true npm run docker:up to read from the backend
+      BACKEND_API_ENABLED: ${BACKEND_API_ENABLED:-false}
+      # Fixed rather than read from .env, whose localhost URL is for npm run dev.
+      # apha-risk-insights-backend joins the apha-risk network when its own compose project is up
+      BACKEND_API_URL: http://apha-risk-insights-backend:3001
+      BACKEND_API_TIMEOUT: ${BACKEND_API_TIMEOUT:-5000}
+      RISK_HISTORY_MONTHS: ${RISK_HISTORY_MONTHS:-6}
     volumes:
       - ./src:/home/node/src
       - ./package.json:/home/node/package.json

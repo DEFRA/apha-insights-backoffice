@@ -6,20 +6,22 @@
 
 IDM Insights (working name) is the back office frontend for APHA's International Disease Monitoring (IDM) team. IDM
 uses it to record risk level changes, replacing risk level changes that are currently produced by hand and published as
-PDF reports. This is a skeleton service: the check your answers step logs a submission but does not send or store it
-until the backend API exists.
+PDF reports. The homepage shows each disease's risk level assessments from the last 6 months, read from
+[apha-risk-insights-backend](https://github.com/DEFRA/apha-risk-insights-backend) when `BACKEND_API_ENABLED` is true.
+Writes are still stubbed: the check your answers step logs a submission but does not send or store it until the
+backend has an endpoint for creating risk level changes.
 
 It is built on the Core Delivery Platform (CDP) Node.js frontend template and follows the structure of
 [apha-risk-insights-frontend](https://github.com/DEFRA/apha-risk-insights-frontend).
 
-| Route                                          | Page                                                                                        |
-| ---------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| `GET /`                                        | Home, with a link to the update risk level page                                             |
-| `GET`, `POST /update-risk-level`               | Choose which diseases to update                                                             |
-| `GET`, `POST /update-risk-level/change`        | Choose whether each selected disease's risk level goes up, down or stays, and add a comment |
-| `GET`, `POST /update-risk-level/check-answers` | Check the answers, then submit                                                              |
-| `GET /update-risk-level/confirmation`          | Submission received                                                                         |
-| `GET /health`                                  | Health check used by the platform                                                           |
+| Route                                          | Page                                                                                         |
+| ---------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `GET /`                                        | Home, with each disease's recent risk level history and a link to the update risk level page |
+| `GET`, `POST /update-risk-level`               | Choose which diseases to update                                                              |
+| `GET`, `POST /update-risk-level/change`        | Choose whether each selected disease's risk level goes up, down or stays, and add a comment  |
+| `GET`, `POST /update-risk-level/check-answers` | Check the answers, then submit                                                               |
+| `GET /update-risk-level/confirmation`          | Submission received                                                                          |
+| `GET /health`                                  | Health check used by the platform                                                            |
 
 The service name shown in the header and page titles is the `serviceDisplayName` default in
 [src/config/config.js](./src/config/config.js). The risk level scale is in
@@ -32,6 +34,7 @@ The service name shown in the header and page titles is the `serviceDisplayName`
 - [Local Development](#local-development)
   - [Setup](#setup)
   - [Development](#development)
+  - [Running against a local backend](#running-against-a-local-backend)
   - [Production](#production)
   - [Testing](#testing)
   - [Npm scripts](#npm-scripts)
@@ -122,6 +125,32 @@ npm run dev
 ```
 
 The service runs at <http://localhost:3000>. To override config defaults, copy [.env.example](./.env.example) to `.env`.
+
+### Running against a local backend
+
+By default the service makes no backend calls and shows placeholder data, marked `Placeholder data` in the Source
+column. To read from apha-risk-insights-backend instead, set these in `.env` or the environment:
+
+| Setting               | Default | Purpose                                                              |
+| --------------------- | ------- | -------------------------------------------------------------------- |
+| `BACKEND_API_ENABLED` | `false` | Read risk data from the backend                                      |
+| `BACKEND_API_URL`     | none    | Base URL of the backend, without a path. Required when enabled       |
+| `BACKEND_API_TIMEOUT` | `5000`  | How long to wait for each backend response, in milliseconds          |
+| `RISK_HISTORY_MONTHS` | `6`     | How many months of history the homepage shows, counted back from now |
+
+With `npm run dev`, start the backend with its synthetic seed data on port 3001, then set `BACKEND_API_ENABLED=true` and
+`BACKEND_API_URL=http://localhost:3001`, as in `.env.example`. The service will not start with the backend switched on
+and no URL.
+
+With Docker Compose, both services join the `apha-risk` network, and this service reaches the backend at
+`http://apha-risk-insights-backend:3001`. Start the backend's compose project first, then:
+
+```bash
+BACKEND_API_ENABLED=true npm run docker:up
+```
+
+If the backend fails, times out, or has a disease with no assessments in the window, the homepage shows the
+"Something went wrong" page rather than partial data.
 
 ### Production
 

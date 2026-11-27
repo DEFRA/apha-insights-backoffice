@@ -8,6 +8,7 @@ const dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const fourHoursMs = 14400000
 const oneWeekMs = 604800000
+const fiveSecondsMs = 5000
 
 const isProduction = process.env.NODE_ENV === 'production'
 const isTest = process.env.NODE_ENV === 'test'
@@ -275,6 +276,33 @@ export const config = convict({
       }
     }
   },
+  backendApi: {
+    enabled: {
+      doc: 'Read data from the backend API. When false, the service uses placeholder data and makes no backend calls',
+      format: Boolean,
+      default: false,
+      env: 'BACKEND_API_ENABLED'
+    },
+    url: {
+      doc: 'Base URL of apha-risk-insights-backend, without a path. Required when backendApi.enabled is true',
+      format: 'url',
+      nullable: true,
+      default: null,
+      env: 'BACKEND_API_URL'
+    },
+    timeout: {
+      doc: 'How long to wait for a backend API response, in milliseconds',
+      format: 'nat',
+      default: fiveSecondsMs,
+      env: 'BACKEND_API_TIMEOUT'
+    },
+    historyMonths: {
+      doc: 'How many months of risk level history the homepage shows, counted back from the time of the request',
+      format: 'nat',
+      default: 6,
+      env: 'RISK_HISTORY_MONTHS'
+    }
+  },
   googleAnalytics: {
     googleTagManagerKey: {
       doc: 'Google Tag Manager container ID (e.g. GTM-XXXXXXXX)',
@@ -286,3 +314,9 @@ export const config = convict({
 })
 
 config.validate({ allowed: 'strict' })
+
+if (config.get('backendApi.enabled') && config.get('backendApi.url') === null) {
+  throw new Error(
+    'BACKEND_API_URL must be set when BACKEND_API_ENABLED is true'
+  )
+}

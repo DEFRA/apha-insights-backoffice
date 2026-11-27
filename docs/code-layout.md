@@ -18,7 +18,7 @@ Each routes file exports an array of route objects. `src/routes/routes.js` combi
 | Folder              | Holds                                                                    |
 | ------------------- | ------------------------------------------------------------------------ |
 | `src/routes/`       | Route definitions and handlers, one folder per domain                    |
-| `src/services/`     | Data access. Stubbed until the backend API exists                        |
+| `src/services/`     | Data access. Reads the backend API when enabled, writes are stubbed      |
 | `src/schemas/`      | Joi validation for form payloads                                         |
 | `src/presenters/`   | Pure functions that turn data into a view model, one per page            |
 | `src/views/`        | Nunjucks templates; `common/` for the layout, `components/` for macros   |
@@ -33,6 +33,8 @@ Each routes file exports an array of route objects. `src/routes/routes.js` combi
 | `scripts/`          | Repo tooling run by npm scripts, such as `lint-shell.sh`                 |
 | `.claude/`          | Claude Code settings, hooks in `hooks/` and skills in `skills/`          |
 | `.husky/`           | Git hooks: `pre-commit` runs format and lint, `commit-msg` checks format |
+
+`src/services/risk-level-service.js` reads from apha-risk-insights-backend through `src/utils/backend-api.js` when `BACKEND_API_ENABLED` is true, and returns placeholder data from `src/services/placeholder-risks.js` otherwise. Writes are still stubbed until the backend has an endpoint for them.
 
 ## Constants
 
