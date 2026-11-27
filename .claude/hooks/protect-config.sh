@@ -4,10 +4,18 @@
 # puts back anything the tool changed, and exit code 2 tells Claude why.
 # Switching branch, pulling or rebasing moves HEAD and is allowed, but a new local commit
 # that touches protected files is reported.
+# Each session keeps its own snapshot, so sessions sharing a checkout cannot overwrite each
+# other's. If the snapshot is missing or incomplete, "check" does nothing rather than revert.
+# A protected file that is committed at HEAD is never deleted.
 # Reverts and reports are recorded in the harness event log, see docs/harness.md.
 
 cd "${CLAUDE_PROJECT_DIR:-.}" || exit 0
-store=$(git rev-parse --git-path claude-protected 2>/dev/null) || exit 0
+
+input=$(cat)
+session=$(printf '%s' "$input" | node -e 'let s = ""; process.stdin.on("data", (d) => (s += d)).on("end", () => process.stdout.write(JSON.parse(s).session_id ?? ""))' 2>/dev/null)
+session=${session//[^A-Za-z0-9_-]/}
+stores=$(git rev-parse --git-path claude-protected 2>/dev/null) || exit 0
+store="$stores/${session:-default}"
 
 protected_paths=(
   eslint.config.js stylelint.config.js .prettierrc.js .prettierignore .shellcheckrc
@@ -30,30 +38,39 @@ package_scripts() {
   node -p 'JSON.stringify(require("./package.json").scripts)' 2>/dev/null
 }
 
-# Records the block. The hook payload is still on stdin, so the logger reads the session from it
+# Records the block. The logger reads the session from the hook payload
 log_event() {
-  node scripts/log-harness-event.js --layer claude-hook --check protect-config --rule protected-config "$@" 2>/dev/null
+  node scripts/log-harness-event.js --layer claude-hook --check protect-config --rule protected-config "$@" <<< "$input" 2>/dev/null
 }
 
 case "$1" in
   snapshot)
-    rm -rf "${store:?}"
-    mkdir -p "$store/files"
-    git rev-parse HEAD > "$store/head"
-    git config core.hooksPath > "$store/hooks-path"
-    package_scripts > "$store/scripts"
-    list_protected_files > "$store/list"
+    mkdir -p "$stores" || exit 0
+    # Remove stores left by sessions that ended more than a day ago
+    find "$stores" -mindepth 1 -maxdepth 1 -mmin +1440 -exec rm -rf {} + 2>/dev/null
+    # Build the snapshot aside and move it into place, so "check" never sees half of one
+    tmp=$(mktemp -d "$stores/.tmp.XXXXXX") || exit 0
+    mkdir -p "$tmp/files"
+    git rev-parse HEAD > "$tmp/head"
+    git config core.hooksPath > "$tmp/hooks-path"
+    package_scripts > "$tmp/scripts"
+    list_protected_files > "$tmp/list"
     while IFS= read -r file; do
-      mkdir -p "$store/files/$(dirname "$file")"
-      cp -p "$file" "$store/files/$file"
-    done < "$store/list"
+      mkdir -p "$tmp/files/$(dirname "$file")"
+      cp -p "$file" "$tmp/files/$file"
+    done < "$tmp/list"
+    rm -rf "${store:?}"
+    mv "$tmp" "$store" || rm -rf "$tmp"
     exit 0
     ;;
   check) ;;
   *) exit 0 ;;
 esac
 
-[[ -f "$store/head" ]] || exit 0
+# Fail open: without a complete snapshot there is nothing safe to compare against
+for part in head hooks-path scripts list files; do
+  [[ -e "$store/$part" ]] || exit 0
+done
 old_head=$(cat "$store/head")
 
 if [[ "$(git rev-parse HEAD)" != "$old_head" ]]; then
@@ -70,13 +87,15 @@ changed=()
 while IFS= read -r file; do
   if ! cmp -s "$file" "$store/files/$file"; then
     mkdir -p "$(dirname "$file")"
-    cp -p "$store/files/$file" "$file"
-    changed+=("$file")
+    if cp -p "$store/files/$file" "$file" 2>/dev/null; then
+      changed+=("$file")
+    fi
   fi
 done < "$store/list"
 
+# A file committed at HEAD is never removed: putting one back is not a change to stop
 while IFS= read -r file; do
-  if ! grep -qxF "$file" "$store/list"; then
+  if ! grep -qxF "$file" "$store/list" && ! git cat-file -e "HEAD:$file" 2>/dev/null; then
     rm -f "$file"
     changed+=("$file (new file removed)")
   fi
